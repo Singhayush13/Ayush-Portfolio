@@ -6,105 +6,116 @@ import { useRef } from "react";
 const About = () => {
   gsap.registerPlugin(ScrollTrigger);
 
-  const imageDivRef = useRef(null);
-  const imageRef = useRef(null);
+  const heroRef = useRef(null);
+  const photoRef = useRef(null);
+  const skillsRef = useRef(null);
 
-  const imageArray = [
-    "https://images.unsplash.com/photo-1603415526960-f7e0328d0a8f?q=80&w=800&auto=format",
-    "https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?q=80&w=800&auto=format",
-    "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=800&auto=format",
-  ];
-
+  // GSAP Animations
   useGSAP(() => {
-    gsap.to(imageDivRef.current, {
+    gsap.from(heroRef.current.querySelectorAll(".animate"), {
+      y: 40,
+      opacity: 0,
+      duration: 1,
+      ease: "power3.out",
+      stagger: 0.2,
+    });
+
+    gsap.from(photoRef.current, {
+      scale: 0.9,
+      opacity: 0,
+      rotate: -3,
+      duration: 1,
+      ease: "elastic.out(1,0.7)",
+      delay: 0.4,
+    });
+
+    gsap.from(skillsRef.current.querySelectorAll(".skill-card"), {
+      y: 30,
+      opacity: 0,
+      stagger: 0.15,
+      duration: 0.8,
+      ease: "power3.out",
       scrollTrigger: {
-        trigger: imageDivRef.current,
-        start: "top 28%",
-        end: "top -70%",
-        pin: true,
-        scrub: 1,
-        onUpdate: (self) => {
-          const index =
-            self.progress < 1
-              ? Math.floor(self.progress * imageArray.length)
-              : imageArray.length - 1;
-          imageRef.current.src = imageArray[index];
-        },
+        trigger: skillsRef.current,
+        start: "top 80%",
       },
     });
   });
 
+  const skills = [
+    {
+      title: "Frontend",
+      desc: "React.js, Next.js, Tailwind CSS — creating modern, responsive, and performant UIs.",
+    },
+    {
+      title: "Backend",
+      desc: "Node.js, Express.js, MongoDB — building scalable APIs and server-side applications.",
+    },
+    {
+      title: "Full Stack & DevOps",
+      desc: "Combining frontend and backend expertise, with deployment, cloud integration, and optimized workflows.",
+    },
+  ];
+
   return (
-    <div className="font-[font2] bg-black text-white">
-      {/* Hero */}
-      <section className="h-screen flex flex-col items-center justify-center text-center px-6">
-        <h1 className="text-6xl lg:text-8xl font-bold uppercase">About Me</h1>
-        <p className="mt-6 max-w-2xl text-lg text-gray-300">
-          Hi, I’m Ayush Singh. A developer and creative mind turning ideas into
-          modern, meaningful digital experiences.
-        </p>
-      </section>
-
-      {/* Scroll Image Animation */}
-      <section className="relative min-h-screen">
-        <div
-          ref={imageDivRef}
-          className="absolute overflow-hidden lg:h-[25vw] h-[35vw] rounded-2xl lg:w-[20vw] w-[30vw] lg:top-96 -top-80 lg:left-[30vw] left-[30vw]"
-        >
-          <img
-            ref={imageRef}
-            className="h-full w-full object-cover"
-            src={imageArray[0]}
-            alt="Profile"
-          />
-        </div>
-
-        <div className="relative">
-          <h2 className="lg:mt-[55vh] mt-[30vh] text-[15vw] text-center uppercase leading-[13vw] font-bold text-[#D3FD50]">
-            Who Am I?
-          </h2>
-          <p className="lg:pl-[40%] lg:mt-16 mt-6 p-4 lg:text-2xl text-lg leading-relaxed text-gray-300">
-            I’m a curious, self-driven developer who loves building things that
-            live on the internet — from sleek websites to interactive
-            experiences. Always learning, always exploring.
+    <div className="bg-black text-white font-[font2]">
+      {/* Hero Section */}
+      <section
+        ref={heroRef}
+        className="min-h-screen flex flex-col-reverse lg:flex-row items-center justify-center px-6 lg:px-20 gap-10 lg:gap-20 pt-24"
+      >
+        {/* Text */}
+        <div className="flex-1 text-center lg:text-left space-y-4">
+          <h1 className="animate text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold uppercase leading-tight">
+            Hi, I'm Ayush
+          </h1>
+          <p className="animate text-gray-300 text-base sm:text-lg md:text-xl lg:text-2xl leading-relaxed max-w-xl mx-auto lg:mx-0">
+            I’m a Full Stack Developer turning ideas into modern, high-performing
+            web applications. I specialize in React.js, Node.js, and complete
+            end-to-end solutions that combine UI/UX with scalable backend systems.
           </p>
         </div>
-      </section>
 
-      {/* Skills */}
-      <section className="py-24 px-6 bg-[#111]">
-        <h2 className="text-4xl font-bold text-center mb-12">My Skills</h2>
-        <div className="grid md:grid-cols-3 gap-10 max-w-6xl mx-auto">
-          <div className="p-8 bg-black/50 border border-white/10 rounded-2xl hover:scale-105 transition">
-            <h3 className="text-2xl font-semibold mb-4 text-[#D3FD50]">
-              Frontend
-            </h3>
-            <p>React, Next.js, Tailwind CSS — building modern UIs.</p>
-          </div>
-          <div className="p-8 bg-black/50 border border-white/10 rounded-2xl hover:scale-105 transition">
-            <h3 className="text-2xl font-semibold mb-4 text-[#D3FD50]">
-              Backend
-            </h3>
-            <p>Node.js, Express, MongoDB — scalable APIs & systems.</p>
-          </div>
-          <div className="p-8 bg-black/50 border border-white/10 rounded-2xl hover:scale-105 transition">
-            <h3 className="text-2xl font-semibold mb-4 text-[#D3FD50]">
-              Design
-            </h3>
-            <p>UI/UX, Figma, motion — blending creativity with usability.</p>
-          </div>
+        {/* Photo */}
+        <div ref={photoRef} className="flex-1 max-w-[280px] sm:max-w-xs md:max-w-sm lg:max-w-md mx-auto">
+          <img
+            src="/ayush.png"
+            alt="Ayush"
+            className="w-full rounded-2xl shadow-2xl object-cover"
+          />
         </div>
       </section>
 
-      {/* CTA */}
-      <section className="py-24 bg-[#D3FD50] text-black text-center">
-        <h2 className="text-4xl font-bold mb-6">Let’s Connect</h2>
-        <p className="max-w-xl mx-auto mb-8 text-lg">
-          Have an idea or project? Let’s build something great together.
+      {/* Skills Section */}
+      <section ref={skillsRef} className="py-16 px-6 lg:px-20 bg-[#111]">
+        <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-center mb-10">
+          My Skills
+        </h2>
+        <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+          {skills.map((skill, idx) => (
+            <div
+              key={idx}
+              className="skill-card p-6 bg-black/60 border border-white/10 rounded-2xl hover:scale-105 transition-transform duration-300 shadow-lg"
+            >
+              <h3 className="text-xl sm:text-2xl font-semibold mb-3 text-[#D3FD50]">
+                {skill.title}
+              </h3>
+              <p className="text-gray-300 text-sm sm:text-base">{skill.desc}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* Call To Action */}
+      <section className="py-16 bg-[#D3FD50] text-black text-center px-6">
+        <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-4">Let’s Connect</h2>
+        <p className="max-w-xl mx-auto mb-6 text-base sm:text-lg lg:text-xl">
+          Have a project idea or need a full-stack solution? Let’s build something
+          amazing together.
         </p>
         <a
           href="/contact"
-          className="px-8 py-4 bg-black text-white rounded-full font-semibold hover:scale-105 transition"
+          className="px-6 sm:px-8 py-3 sm:py-4 bg-black text-white rounded-full font-semibold hover:scale-105 transition-transform duration-300 shadow-lg inline-block text-sm sm:text-base"
         >
           Contact Me
         </a>

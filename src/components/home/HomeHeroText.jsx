@@ -2,111 +2,96 @@ import React, { useEffect, useRef } from "react";
 import { gsap } from "gsap";
 
 const HomeHeroText = () => {
-  const textRef = useRef(null);
-  const photoRef = useRef(null);
+  const sectionRef = useRef(null);
 
   useEffect(() => {
-    const tl = gsap.timeline({
-      defaults: { ease: "power3.out", duration: 0.9 },
-    });
+    const tl = gsap.timeline({ defaults: { ease: "power3.out", duration: 1 } });
+    const lines = sectionRef.current.querySelectorAll(".line");
 
-    // Animate lines
+    // Animate heading lines
     tl.fromTo(
-      textRef.current.querySelectorAll(".line"),
-      { y: 90, opacity: 0, skewY: 5 },
-      { y: 0, opacity: 1, skewY: 0, stagger: 0.22 }
+      lines,
+      { y: 80, opacity: 0, skewY: 5 },
+      { y: 0, opacity: 1, skewY: 0, stagger: 0.25 }
     );
 
-    // Animate photo
+    // Animate subtitle
     tl.fromTo(
-      photoRef.current,
-      { scale: 0.7, opacity: 0, rotate: -10 },
-      {
-        scale: 1,
-        opacity: 1,
-        rotate: 0,
-        duration: 1,
-        ease: "elastic.out(1, 0.7)",
-      },
-      "-=0.6"
+      sectionRef.current.querySelector(".subtitle"),
+      { opacity: 0, y: 20 },
+      { opacity: 1, y: 0, duration: 1 },
+      "-=0.3"
     );
   }, []);
 
-  // Hover animation for photo
+  // Hover animations for heading lines
   useEffect(() => {
-    const el = photoRef.current;
-    if (!el) return;
+    const lines = sectionRef.current.querySelectorAll(".line");
 
-    const enter = () =>
-      gsap.to(el, {
-        scale: 1.08,
-        rotate: 3,
-        boxShadow: "0px 8px 25px rgba(78,158,255,0.6)",
-        duration: 0.35,
-        ease: "power3.out",
-      });
+    lines.forEach((line) => {
+      const enter = () =>
+        gsap.to(line, {
+          y: -5,
+          color: "#D3FD50",
+          duration: 0.3,
+          ease: "power2.out",
+        });
 
-    const leave = () =>
-      gsap.to(el, {
-        scale: 1,
-        rotate: 0,
-        boxShadow: "0px 4px 15px rgba(255,255,255,0.2)",
-        duration: 0.35,
-        ease: "power3.out",
-      });
+      const leave = () =>
+        gsap.to(line, {
+          y: 0,
+          color: line.classList.contains("text-[#4E9EFF]") ? "#4E9EFF" : "#ffffff",
+          duration: 0.3,
+          ease: "power2.out",
+        });
 
-    el.addEventListener("mouseenter", enter);
-    el.addEventListener("mouseleave", leave);
+      line.addEventListener("mouseenter", enter);
+      line.addEventListener("mouseleave", leave);
 
-    return () => {
-      el.removeEventListener("mouseenter", enter);
-      el.removeEventListener("mouseleave", leave);
-    };
+      // Cleanup
+      return () => {
+        line.removeEventListener("mouseenter", enter);
+        line.removeEventListener("mouseleave", leave);
+      };
+    });
+
+    // Hover for subtitle
+    const subtitle = sectionRef.current.querySelector(".subtitle");
+    if (subtitle) {
+      const enterSub = () =>
+        gsap.to(subtitle, { color: "#ffffff", duration: 0.3, ease: "power2.out" });
+      const leaveSub = () =>
+        gsap.to(subtitle, { color: "#d1d5db", duration: 0.3, ease: "power2.out" }); // gray-300
+
+      subtitle.addEventListener("mouseenter", enterSub);
+      subtitle.addEventListener("mouseleave", leaveSub);
+
+      return () => {
+        subtitle.removeEventListener("mouseenter", enterSub);
+        subtitle.removeEventListener("mouseleave", leaveSub);
+      };
+    }
   }, []);
 
   return (
     <section
-      ref={textRef}
-      className="font-[font1] mt-24 lg:mt-0 pt-8 text-center select-none"
+      ref={sectionRef}
+      className="font-[font1] mt-20 lg:mt-32 px-6 text-center select-none"
     >
-      {/* First line */}
-      <div className="line lg:text-[6vw] text-[9vw] flex justify-center items-center uppercase lg:leading-[6vw] leading-[9vw] font-extrabold tracking-tight">
-        Hello, I'm{" "}
-        <span className="ml-3 bg-gradient-to-r from-[#4E9EFF] via-[#7C3AED] to-[#4E9EFF] bg-clip-text text-transparent transition-all duration-300">
-          Ayush
-        </span>
+      {/* Hero Heading */}
+      <div className="line text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold uppercase tracking-tight leading-tight">
+        Hello, I'm <span className="text-[#4E9EFF]">Ayush</span>
       </div>
 
-      {/* Second line with profile photo */}
-      <div className="line lg:text-[6vw] text-[8.5vw] flex justify-center items-center uppercase lg:leading-[6vw] leading-[8.5vw] mt-6 font-bold">
-        A
-        <div
-          ref={photoRef}
-          className="photo-thumb h-[7vw] w-[7vw] lg:h-[6vw] lg:w-[6vw] rounded-full overflow-hidden mx-4 border-4 border-white shadow-[0px_4px_15px_rgba(255,255,255,0.2)] transition-all duration-300"
-          style={{ transformOrigin: "center" }}
-        >
-          <img
-            src="/ayush.png"
-            alt="Ayush"
-            className="h-full w-full object-cover object-center"
-          />
-        </div>
-        <span className="transition-colors duration-300 hover:text-[#4E9EFF]">
-          Developer
-        </span>
-      </div>
-
-      {/* Third line */}
-      <div className="line lg:text-[6vw] text-[9vw] flex justify-center items-center uppercase lg:leading-[6vw] leading-[9vw] mt-6 font-bold">
-        <span className="transition-colors duration-300 hover:text-[#7C3AED]">
-          & Designer
-        </span>
+      <div className="line text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold uppercase tracking-tight mt-6">
+        Frontend Developer & Designer
       </div>
 
       {/* Subtitle */}
-      <p className="line mt-8 text-gray-300 text-sm lg:text-lg tracking-wide max-w-2xl mx-auto px-6 leading-relaxed hover:text-white transition-colors duration-300">
-        I build clean, usable web apps with a focus on UX and performance —
-        React, Node, and thoughtful design.
+      <p className="subtitle mt-6 text-gray-300 text-base sm:text-lg md:text-xl lg:text-2xl max-w-3xl mx-auto leading-relaxed">
+        I build clean, usable web applications with a focus on UX, performance,
+        and scalability. React.js, Node.js, and thoughtful design are my
+        specialties.
       </p>
     </section>
   );

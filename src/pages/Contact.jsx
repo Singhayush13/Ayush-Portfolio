@@ -6,39 +6,49 @@ import { FaInstagram, FaLinkedin } from "react-icons/fa";
 const Contact = () => {
   const containerRef = useRef(null);
   const formRef = useRef(null);
+  const socialRef = useRef(null);
 
   useEffect(() => {
+    // Animate container
     gsap.fromTo(
       containerRef.current,
       { opacity: 0, y: 40 },
       { opacity: 1, y: 0, duration: 1, ease: "power3.out" }
     );
 
+    // Animate form
     gsap.fromTo(
       formRef.current,
       { opacity: 0, scale: 0.95 },
       { opacity: 1, scale: 1, duration: 1.1, ease: "power3.out", delay: 0.3 }
+    );
+
+    // Animate social icons
+    gsap.fromTo(
+      socialRef.current.querySelectorAll("a"),
+      { y: 20, opacity: 0 },
+      { y: 0, opacity: 1, stagger: 0.15, duration: 0.8, ease: "power3.out", delay: 0.5 }
     );
   }, []);
 
   return (
     <div
       ref={containerRef}
-      className="min-h-screen flex flex-col items-center justify-center px-6 py-20 bg-black text-white"
+      className="min-h-screen flex flex-col items-center justify-start px-6 py-20 bg-black text-white"
     >
       {/* Heading */}
-      <h1 className="text-5xl md:text-6xl font-extrabold mb-6 uppercase tracking-tight">
+      <h1 className="text-5xl md:text-6xl font-extrabold mb-4 uppercase tracking-tight text-center">
         Let’s Connect
       </h1>
       <p className="max-w-2xl text-gray-400 text-center mb-12 text-lg leading-relaxed">
-        I’d love to hear from you! Whether you have a question, want to
-        collaborate, or just say hi — drop me a message below.
+        I’d love to hear from you! Whether you have a question, want to collaborate, or
+        just say hi — drop me a message below.
       </p>
 
       {/* Social Links */}
-      <div className="flex space-x-10 mb-14">
+      <div ref={socialRef} className="flex space-x-10 mb-14">
         <a
-          href="https://www.instagram.com/yourusername"
+          href="https://www.instagram.com/singhayush13?igsh=amtpeHlxMzJnNG1r"
           target="_blank"
           rel="noopener noreferrer"
           className="text-4xl text-gray-400 hover:text-pink-500 hover:scale-125 transition-all duration-300"
@@ -46,7 +56,7 @@ const Contact = () => {
           <FaInstagram />
         </a>
         <a
-          href="https://www.linkedin.com/in/yourusername"
+          href="https://www.linkedin.com/in/singhayush1356?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=android_app"
           target="_blank"
           rel="noopener noreferrer"
           className="text-4xl text-gray-400 hover:text-blue-500 hover:scale-125 transition-all duration-300"
@@ -58,14 +68,14 @@ const Contact = () => {
       {/* Contact Form */}
       <form
         ref={formRef}
-        className="w-full max-w-lg bg-neutral-900 p-10 rounded-2xl shadow-lg border border-gray-800 space-y-6"
+        className="w-full max-w-lg bg-neutral-900 p-10 rounded-2xl shadow-xl border border-gray-800 space-y-6"
       >
         <div>
           <label className="block text-gray-300 font-medium mb-2">Name</label>
           <input
             type="text"
             placeholder="Enter your name"
-            className="w-full px-4 py-3 rounded-lg bg-black text-white border border-gray-700 focus:ring-2 focus:ring-[#D3FD50] outline-none transition"
+            className="w-full px-4 py-3 rounded-lg bg-black text-white border border-gray-700 focus:ring-2 focus:ring-[#D3FD50] outline-none transition duration-300 hover:border-[#D3FD50]"
           />
         </div>
 
@@ -74,7 +84,7 @@ const Contact = () => {
           <input
             type="email"
             placeholder="Enter your email"
-            className="w-full px-4 py-3 rounded-lg bg-black text-white border border-gray-700 focus:ring-2 focus:ring-[#D3FD50] outline-none transition"
+            className="w-full px-4 py-3 rounded-lg bg-black text-white border border-gray-700 focus:ring-2 focus:ring-[#D3FD50] outline-none transition duration-300 hover:border-[#D3FD50]"
           />
         </div>
 
@@ -83,13 +93,13 @@ const Contact = () => {
           <textarea
             rows="5"
             placeholder="Type your message..."
-            className="w-full px-4 py-3 rounded-lg bg-black text-white border border-gray-700 focus:ring-2 focus:ring-[#D3FD50] outline-none transition"
+            className="w-full px-4 py-3 rounded-lg bg-black text-white border border-gray-700 focus:ring-2 focus:ring-[#D3FD50] outline-none transition duration-300 hover:border-[#D3FD50]"
           />
         </div>
 
         <button
           type="submit"
-          className="w-full bg-[#D3FD50] text-black py-3 rounded-lg font-semibold hover:scale-[1.03] hover:shadow-lg transition-all duration-300"
+          className="w-full bg-[#D3FD50] text-black py-3 rounded-lg font-semibold hover:scale-[1.05] hover:shadow-lg transition-all duration-300"
         >
           Send Message
         </button>

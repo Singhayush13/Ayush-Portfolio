@@ -1,63 +1,75 @@
-import { useGSAP } from '@gsap/react'
-import gsap from 'gsap'
-import { useRef } from 'react'
-import { useLocation } from 'react-router-dom'
+import { useGSAP } from "@gsap/react";
+import gsap from "gsap";
+import { useRef } from "react";
+import { useLocation } from "react-router-dom";
 
-const Stairs = (props) => {
+const Stairs = ({ children }) => {
+  const currentPath = useLocation().pathname;
 
-    const currentPath = useLocation().pathname
+  const stairParentRef = useRef(null);
+  const pageRef = useRef(null);
 
-    const stairParentRef = useRef(null)
-    const pageRef = useRef(null)
+  useGSAP(
+    () => {
+      const ctx = gsap.context(() => {
+        const tl = gsap.timeline({ defaults: { ease: "expo.inOut" } });
 
-    useGSAP(function () {
-        const tl = gsap.timeline()
-        tl.to(stairParentRef.current, {
-            display: 'block',
-        })
-        tl.from('.stair', {
-            height: 0,
-            stagger: {
-                amount: -0.2
-            }
-        })
-        tl.to('.stair', {
-            y: '100%',
-            stagger: {
-                amount: -0.25
-            }
-        })
-        tl.to(stairParentRef.current, {
-            display: 'none'
-        })
-        tl.to('.stair', {
-            y: '0%',
-        })
+        // Reset stairs before animation
+        gsap.set(".stair", { y: "0%", height: "0%" });
+        gsap.set(stairParentRef.current, { opacity: 1, pointerEvents: "auto" });
 
-        gsap.from(pageRef.current,{
-            opacity:0,
-            delay:1.3,
-            scale:1.2
-        })
-    }, [currentPath])
-    
+        // Animate stairs growing
+        tl.to(".stair", {
+          height: "100%",
+          duration: 0.6,
+          stagger: { each: 0.12, from: "start" },
+        });
 
-    return (
-        <div>
-            <div ref={stairParentRef} className='h-screen w-full fixed z-20 top-0'>
-                <div className='h-full w-full flex'>
-                    <div className='stair h-full w-1/5 bg-black'></div>
-                    <div className='stair h-full w-1/5 bg-black'></div>
-                    <div className='stair h-full w-1/5 bg-black'></div>
-                    <div className='stair h-full w-1/5 bg-black'></div>
-                    <div className='stair h-full w-1/5 bg-black'></div>
-                </div>
-            </div>
-            <div ref={pageRef}>
-                {props.children}
-            </div>
-        </div>
-    )
-}
+        // Slide stairs down
+        tl.to(".stair", {
+          y: "100%",
+          duration: 0.6,
+          stagger: { each: 0.12, from: "start" },
+        });
 
-export default Stairs
+        // Fade out stairs container
+        tl.set(stairParentRef.current, { opacity: 0, pointerEvents: "none" });
+
+        // Animate page content in after stairs
+        tl.fromTo(
+          pageRef.current,
+          { opacity: 0, scale: 1.04 },
+          {
+            opacity: 1,
+            scale: 1,
+            duration: 0.9,
+            ease: "power2.out",
+          },
+          "-=0.3" // slight overlap for smoothness
+        );
+      }, stairParentRef);
+
+      return () => ctx.revert(); // cleanup animations per route
+    },
+    { dependencies: [currentPath] }
+  );
+
+  return (
+    <div>
+      {/* Transition Layer */}
+      <div
+        ref={stairParentRef}
+        className="fixed inset-0 z-50 flex opacity-0 pointer-events-none"
+      >
+        {Array.from({ length: 5 }).map((_, i) => (
+          <div key={i} className="stair flex-1 bg-black"></div>
+        ))}
+      </div>
+
+      {/* Page Content */}
+      <div ref={pageRef}>{children}</div>
+    </div>
+  );
+};
+
+export default Stairs;
