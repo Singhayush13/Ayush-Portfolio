@@ -5,6 +5,7 @@ import Projects from './pages/Projects'
 import Navbar from './components/Navigation/Navbar'
 import FullScreenNav from './components/Navigation/FullScreenNav'
 import Contact from './pages/Contact'
+import Resume from './components/resume/resume'
 
 
 const App = () => {
@@ -17,6 +18,7 @@ const App = () => {
         <Route path='/about' element={<About />} />
         <Route path='/contact' element={<Contact />} />
         <Route path='/projects' element={<Projects />} />
+        <Route path='/resume' element={<Resume />} />
       </Routes>
     </div>
   )

@@ -1,98 +1,137 @@
 import React, { useEffect, useRef } from "react";
 import { gsap } from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+
+gsap.registerPlugin(ScrollTrigger);
 
 const HomeHeroText = () => {
   const sectionRef = useRef(null);
+  const titleRef = useRef(null);
 
   useEffect(() => {
-    const tl = gsap.timeline({ defaults: { ease: "power3.out", duration: 1 } });
-    const lines = sectionRef.current.querySelectorAll(".line");
+    const ctx = gsap.context(() => {
+      const tl = gsap.timeline({ defaults: { ease: "power3.out", duration: 1 } });
 
-    // Animate heading lines
-    tl.fromTo(
-      lines,
-      { y: 80, opacity: 0, skewY: 5 },
-      { y: 0, opacity: 1, skewY: 0, stagger: 0.25 }
-    );
+      // Hero Heading Animation
+      tl.fromTo(".line", { y: 80, opacity: 0, skewY: 5 }, { y: 0, opacity: 1, skewY: 0, stagger: 0.25 });
 
-    // Animate subtitle
-    tl.fromTo(
-      sectionRef.current.querySelector(".subtitle"),
-      { opacity: 0, y: 20 },
-      { opacity: 1, y: 0, duration: 1 },
-      "-=0.3"
-    );
+      // Underline Animation
+      tl.fromTo(".underline", { width: 0 }, { width: "100%", duration: 1, ease: "power2.out" }, "-=0.5");
+
+      // Subtitle Animation
+      tl.fromTo(".subtitle", { y: 40, opacity: 0 }, { y: 0, opacity: 1 }, "-=0.3");
+
+      // Skill Pills Animation
+      tl.fromTo(".skill-pill", { y: 20, opacity: 0 }, { y: 0, opacity: 1, stagger: 0.1 }, "-=0.3");
+    }, sectionRef);
+
+    return () => ctx.revert();
   }, []);
 
-  // Hover animations for heading lines
   useEffect(() => {
-    const lines = sectionRef.current.querySelectorAll(".line");
+    if (!titleRef.current) return;
 
-    lines.forEach((line) => {
-      const enter = () =>
-        gsap.to(line, {
-          y: -5,
-          color: "#D3FD50",
-          duration: 0.3,
-          ease: "power2.out",
-        });
+    const text = "FULL-STACK DEVELOPER";
+    const container = titleRef.current;
+    container.innerHTML = ""; // Clear existing
 
-      const leave = () =>
-        gsap.to(line, {
-          y: 0,
-          color: line.classList.contains("text-[#4E9EFF]") ? "#4E9EFF" : "#ffffff",
-          duration: 0.3,
-          ease: "power2.out",
-        });
-
-      line.addEventListener("mouseenter", enter);
-      line.addEventListener("mouseleave", leave);
-
-      // Cleanup
-      return () => {
-        line.removeEventListener("mouseenter", enter);
-        line.removeEventListener("mouseleave", leave);
-      };
+    // Create span for each letter
+    text.split("").forEach((char) => {
+      const span = document.createElement("span");
+      span.textContent = char;
+      span.classList.add("char");
+      container.appendChild(span);
     });
 
-    // Hover for subtitle
-    const subtitle = sectionRef.current.querySelector(".subtitle");
-    if (subtitle) {
-      const enterSub = () =>
-        gsap.to(subtitle, { color: "#ffffff", duration: 0.3, ease: "power2.out" });
-      const leaveSub = () =>
-        gsap.to(subtitle, { color: "#d1d5db", duration: 0.3, ease: "power2.out" }); // gray-300
+    const chars = container.querySelectorAll(".char");
 
-      subtitle.addEventListener("mouseenter", enterSub);
-      subtitle.addEventListener("mouseleave", leaveSub);
+    const animateLetters = () => {
+      const tl = gsap.timeline();
+      tl.fromTo(
+        chars,
+        { opacity: 0, y: 20 },
+        {
+          opacity: 1,
+          y: 0,
+          stagger: 0.05,
+          ease: "power3.out",
+          duration: 0.6,
+        }
+      );
+      tl.to(chars, {
+        opacity: 0,
+        y: -10,
+        stagger: 0.03,
+        ease: "power2.in",
+        delay: 1,
+        duration: 0.4,
+      });
+      return tl;
+    };
 
-      return () => {
-        subtitle.removeEventListener("mouseenter", enterSub);
-        subtitle.removeEventListener("mouseleave", leaveSub);
-      };
-    }
+    // Repeat animation infinitely
+    gsap.timeline({ repeat: -1, repeatDelay: 0.5 }).add(animateLetters());
   }, []);
 
   return (
     <section
       ref={sectionRef}
-      className="font-[font1] mt-20 lg:mt-32 px-6 text-center select-none"
+      className="relative font-[font1] text-center px-6 mt-20 lg:mt-32 min-h-screen flex flex-col items-center justify-center overflow-hidden"
     >
-      {/* Hero Heading */}
-      <div className="line text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold uppercase tracking-tight leading-tight">
-        Hello, I'm <span className="text-[#4E9EFF]">Ayush</span>
-      </div>
+      {/* Background with parallax blobs */}
+      <div className="absolute inset-0 -z-10 bg-gradient-to-b from-black via-[#0e0e0e] to-[#0a0a0a]"></div>
+      <div className="absolute top-0 left-1/3 w-[700px] h-[700px] bg-[#4E9EFF]/20 rounded-full blur-[180px] animate-pulse-slow -z-10"></div>
+      <div className="absolute bottom-0 right-0 w-[400px] h-[400px] bg-[#D3FD50]/15 rounded-full blur-[150px] animate-pulse-slower -z-10"></div>
 
-      <div className="line text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold uppercase tracking-tight mt-6">
-        Frontend Developer & Designer
-      </div>
+      {/* Hero Heading */}
+      <h1 className="line text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold uppercase tracking-tight leading-tight">
+        Hi, I'm{" "}
+        <span className="relative text-[#4E9EFF] hover:text-[#D3FD50] transition-colors duration-500 cursor-pointer">
+          Ayush Singh
+          <span className="underline absolute left-0 bottom-0 h-[3px] bg-[#D3FD50] block scale-x-0 origin-left transition-transform duration-500 group-hover:scale-x-100"></span>
+        </span>
+      </h1>
+
+      {/* Animated FULL-STACK Text */}
+      <h2
+        ref={titleRef}
+        className="mt-4 text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold uppercase tracking-tight text-[#D3FD50] flex gap-1 justify-center"
+      ></h2>
 
       {/* Subtitle */}
       <p className="subtitle mt-6 text-gray-300 text-base sm:text-lg md:text-xl lg:text-2xl max-w-3xl mx-auto leading-relaxed">
-        I build clean, usable web applications with a focus on UX, performance,
-        and scalability. React.js, Node.js, and thoughtful design are my
-        specialties.
+        Crafting scalable, user-centric applications with{" "}
+        <span className="text-[#4E9EFF] hover:text-[#D3FD50] transition-colors duration-300 cursor-pointer">React</span>,{" "}
+        <span className="text-[#D3FD50] hover:text-[#4E9EFF] transition-colors duration-300 cursor-pointer">Node.js</span>, and clean, optimized backend systems.
       </p>
+
+      {/* Skill Badges */}
+      <div className="flex flex-wrap justify-center gap-3 mt-10">
+        {["React.js", "Node.js", "Express.js", "MongoDB", "SQL", "ASP.NET", "GSAP", "UI/UX"].map((skill) => (
+          <span
+            key={skill}
+            className="skill-pill border border-gray-700 text-gray-200 px-4 py-2 rounded-full text-sm sm:text-base backdrop-blur-md hover:border-[#4E9EFF] hover:text-[#4E9EFF] hover:shadow-[0px_0px_15px_rgba(78,158,255,0.6)] hover:scale-110 transition-all duration-300 cursor-pointer"
+          >
+            {skill}
+          </span>
+        ))}
+      </div>
+
+      {/* CTA Buttons */}
+      <div className="flex gap-6 mt-10">
+        <a
+          href="/projects"
+          className="btn-link px-8 py-4 border-2 border-white rounded-full uppercase font-semibold text-lg tracking-wide transition-all duration-300 hover:scale-110 hover:border-[#D3FD50] hover:text-[#D3FD50] hover:shadow-[0px_10px_40px_rgba(211,253,80,0.5)] hover:-translate-y-1"
+        >
+          View Projects
+        </a>
+        <a
+          href="/about"
+          className="btn-link px-8 py-4 border-2 border-white rounded-full uppercase font-semibold text-lg tracking-wide transition-all duration-300 hover:scale-110 hover:border-[#4E9EFF] hover:text-[#4E9EFF] hover:shadow-[0px_10px_40px_rgba(78,158,255,0.5)] hover:-translate-y-1"
+        >
+          About Me
+        </a>
+      </div>
     </section>
   );
 };
