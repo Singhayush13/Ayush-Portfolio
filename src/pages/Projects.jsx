@@ -17,7 +17,7 @@ const Projects = () => {
         "Fully responsive frontend for a Zerodha-inspired trading platform built with ReactJS and Bootstrap CSS. Backend & dashboard in progress.",
       githubLink: "https://github.com/Singhayush13/Zerodha-Clone-",
       demoLink:
-        "https://www.linkedin.com/posts/singhayush1356_webdevelopment-nodejs-mongodb-activity-7268690751780245504-WQZY?utm_source=share&utm_medium=member_desktop&rcm=ACoAAEvghNgBvYSuCZ5WKPx03EgDmZsZAijdSoc",
+        "https://www.linkedin.com/posts/singhayush1356_webdevelopment-nodejs-mongodb-activity-7268690751780245504-WQZY?utm_source=share&utm_medium=member_desktop",
       techStack: ["React.js", "Bootstrap", "Responsive Design", "UI/UX"],
     },
     {
@@ -31,7 +31,7 @@ const Projects = () => {
         "Listing management platform for admins and users, featuring secure authentication, CRUD operations, Cloudinary image uploads, and responsive UI.",
       githubLink: "https://github.com/Singhayush13/WanderLust",
       demoLink:
-        "https://www.linkedin.com/posts/singhayush1356_webdevelopment-nodejs-mongodb-activity-7253734090841972736--kfK?utm_source=share&utm_medium=member_desktop&rcm=ACoAAEvghNgBvYSuCZ5WKPx03EgDmZsZAijdSoc",
+        "https://www.linkedin.com/posts/singhayush1356_webdevelopment-nodejs-mongodb-activity-7253734090841972736--kfK",
       techStack: [
         "Node.js",
         "Express.js",
@@ -66,7 +66,7 @@ const Projects = () => {
         "For more mini projects and experiments, visit my GitHub and LinkedIn.",
       githubLink: "https://github.com/Singhayush13",
       demoLink:
-        "https://www.linkedin.com/in/singhayush1356?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=android_app",
+        "https://www.linkedin.com/in/singhayush1356",
       techStack: [],
     },
   ];
@@ -77,8 +77,8 @@ const Projects = () => {
     gsap.utils.toArray(".project-card").forEach((card, i) => {
       gsap.from(card, {
         opacity: 0,
-        y: 80,
-        scale: 0.95,
+        y: 50,
+        scale: 0.9,
         duration: 1,
         ease: "power3.out",
         scrollTrigger: {
@@ -87,6 +87,18 @@ const Projects = () => {
           toggleActions: "play none none reverse",
         },
         delay: i * 0.1,
+      });
+    });
+
+    // Parallax effect on images
+    gsap.utils.toArray(".project-card img").forEach((img) => {
+      gsap.to(img, {
+        yPercent: -10,
+        ease: "none",
+        scrollTrigger: {
+          trigger: img,
+          scrub: true,
+        },
       });
     });
   }, []);
@@ -108,14 +120,7 @@ const Projects = () => {
       <div className="mt-20 grid gap-10 sm:grid-cols-2 lg:grid-cols-3">
         {projects.map((project, idx) => (
           <div key={idx} className="project-card">
-            <ProjectCard
-              images={project.images}
-              title={project.title}
-              description={project.description}
-              githubLink={project.githubLink}
-              demoLink={project.demoLink}
-              techStack={project.techStack}
-            />
+            <ProjectCard {...project} />
           </div>
         ))}
       </div>

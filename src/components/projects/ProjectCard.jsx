@@ -1,6 +1,6 @@
 // src/components/projects/ProjectCard.jsx
 import React, { useState, useEffect, useRef } from "react";
-import { FaGithub, FaLinkedin } from "react-icons/fa";
+import { FaGithub, FaExternalLinkAlt } from "react-icons/fa";
 
 const ProjectCard = ({ images, title, description, githubLink, demoLink, techStack = [] }) => {
   const [currentImage, setCurrentImage] = useState(0);
@@ -9,24 +9,26 @@ const ProjectCard = ({ images, title, description, githubLink, demoLink, techSta
   useEffect(() => {
     if (images.length > 1) {
       intervalRef.current = setInterval(() => {
-        setCurrentImage(prev => (prev + 1) % images.length);
-      }, 2000);
+        setCurrentImage((prev) => (prev + 1) % images.length);
+      }, 2500);
     }
     return () => clearInterval(intervalRef.current);
   }, [images]);
 
   return (
-    <div className="group relative overflow-hidden rounded-3xl shadow-lg hover:shadow-[0_0_80px_rgba(211,253,80,0.4)] transition-all duration-500 bg-gradient-to-b from-[#111111] to-[#1a1a1a] border border-gray-800">
+    <div className="relative flex flex-col rounded-3xl overflow-hidden shadow-lg bg-gradient-to-b from-[#111] to-[#1a1a1a] border border-gray-800 transform hover:scale-[1.02] transition-all duration-500">
       {/* Project Image */}
-      <img
-        src={images[currentImage]}
-        alt={title}
-        className="w-full h-64 md:h-72 object-cover transform group-hover:scale-110 transition-transform duration-700"
-      />
+      <div className="overflow-hidden relative">
+        <img
+          src={images[currentImage]}
+          alt={title}
+          className="w-full h-64 md:h-72 object-cover transform hover:scale-110 transition-transform duration-700"
+        />
+      </div>
 
-      {/* Overlay */}
-      <div className="absolute inset-0 bg-black/75 opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex flex-col justify-between p-6">
-        {/* Project Info */}
+      {/* Project Content (always visible) */}
+      <div className="p-6 flex flex-col flex-1 justify-between backdrop-blur-md bg-black/40">
+        {/* Title & Description */}
         <div>
           <h3 className="text-2xl md:text-3xl font-bold text-[#D3FD50] mb-2 text-shadow-neon">
             {title}
@@ -36,7 +38,7 @@ const ProjectCard = ({ images, title, description, githubLink, demoLink, techSta
           </p>
         </div>
 
-        {/* Tech Stack Tags */}
+        {/* Tech Stack */}
         {techStack.length > 0 && (
           <div className="flex flex-wrap gap-2 mt-4">
             {techStack.map((tech) => (
@@ -69,7 +71,7 @@ const ProjectCard = ({ images, title, description, githubLink, demoLink, techSta
               rel="noopener noreferrer"
               className="flex items-center gap-2 px-4 py-2 bg-[#4E9EFF] hover:bg-[#3a7be0] text-white rounded-full text-sm md:text-base transition-all"
             >
-              <FaLinkedin /> LinkedIn / Demo
+              <FaExternalLinkAlt /> LinkedIn
             </a>
           )}
         </div>
