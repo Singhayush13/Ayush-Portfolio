@@ -2,9 +2,13 @@
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/all";
+import { useContext } from "react";
 import ProjectCard from "../components/projects/ProjectCard";
+import { ThemeContext } from "../context/ThemeContext"; // make sure this exists
 
 const Projects = () => {
+  const { theme } = useContext(ThemeContext); // "light" or "dark"
+
   const projects = [
     {
       images: [
@@ -65,8 +69,7 @@ const Projects = () => {
       description:
         "For more mini projects and experiments, visit my GitHub and LinkedIn.",
       githubLink: "https://github.com/Singhayush13",
-      demoLink:
-        "https://www.linkedin.com/in/singhayush1356",
+      demoLink: "https://www.linkedin.com/in/singhayush1356",
       techStack: [],
     },
   ];
@@ -103,14 +106,19 @@ const Projects = () => {
     });
   }, []);
 
+  // Theme-based classes
+  const sectionBg = theme === "dark" ? "bg-black text-white" : "bg-white text-gray-900";
+  const headerText = theme === "dark" ? "text-white text-shadow-neon" : "text-blue-700";
+  const paragraphText = theme === "dark" ? "text-gray-400" : "text-gray-700";
+
   return (
-    <section className="relative min-h-screen px-6 lg:px-20 py-28 bg-black text-white">
+    <section className={`relative min-h-screen px-6 lg:px-20 py-28 ${sectionBg}`}>
       {/* Section Header */}
       <div className="text-center max-w-3xl mx-auto">
-        <h2 className="font-[font2] text-5xl md:text-7xl uppercase font-extrabold tracking-tight text-white text-shadow-neon mb-4">
+        <h2 className={`font-[font2] text-5xl md:text-7xl uppercase font-extrabold tracking-tight mb-4 ${headerText}`}>
           My Projects
         </h2>
-        <p className="text-gray-400 text-sm md:text-lg leading-relaxed">
+        <p className={`text-sm md:text-lg leading-relaxed ${paragraphText}`}>
           A curated selection of my professional work — blending design,
           interactivity, and performance to deliver seamless digital experiences.
         </p>

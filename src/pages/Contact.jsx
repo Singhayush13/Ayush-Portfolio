@@ -1,12 +1,44 @@
 // src/pages/Contact.jsx
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useContext } from "react";
 import { gsap } from "gsap";
 import { FaInstagram, FaLinkedin } from "react-icons/fa";
+import { ThemeContext } from "../context/ThemeContext";
 
 const Contact = () => {
+  const { theme } = useContext(ThemeContext);
+  const isDark = theme === "dark";
+
   const containerRef = useRef(null);
   const formRef = useRef(null);
   const socialRef = useRef(null);
+
+  // Theme colors
+  const colors = {
+    dark: {
+      bg: "#0a0a0a",
+      text: "#cfcfcf",
+      inputBg: "#1a1a1a",
+      inputBorder: "#2c2c2c",
+      focusRing: "#f59e0b", // amber
+      buttonBg: "#f59e0b",
+      buttonText: "#000000",
+      socialHoverInstagram: "#ec4899",
+      socialHoverLinkedin: "#3b82f6",
+    },
+    light: {
+      bg: "#f9fafb",
+      text: "#1f2937",
+      inputBg: "#ffffff",
+      inputBorder: "#d1d5db",
+      focusRing: "#2563eb", // professional blue
+      buttonBg: "#2563eb",
+      buttonText: "#ffffff",
+      socialHoverInstagram: "#ec4899",
+      socialHoverLinkedin: "#2563eb",
+    },
+  };
+
+  const themeColors = isDark ? colors.dark : colors.light;
 
   useEffect(() => {
     // Animate container
@@ -34,13 +66,14 @@ const Contact = () => {
   return (
     <div
       ref={containerRef}
-      className="min-h-screen flex flex-col items-center justify-start px-6 py-20 bg-black text-white"
+      className="min-h-screen flex flex-col items-center justify-start px-6 py-20"
+      style={{ backgroundColor: themeColors.bg, color: themeColors.text }}
     >
       {/* Heading */}
-      <h1 className="text-5xl md:text-6xl font-extrabold mb-4 uppercase tracking-tight text-center">
+      <h1 className="text-5xl md:text-6xl mt-5 font-extrabold mb-4 uppercase tracking-tight text-center">
         Let’s Connect
       </h1>
-      <p className="max-w-2xl text-gray-400 text-center mb-12 text-lg leading-relaxed">
+      <p className="max-w-2xl text-center mb-12 text-lg leading-relaxed" style={{ color: themeColors.text }}>
         I’d love to hear from you! Whether you have a question, want to collaborate, or
         just say hi — drop me a message below.
       </p>
@@ -51,7 +84,10 @@ const Contact = () => {
           href="https://www.instagram.com/singhayush13?igsh=amtpeHlxMzJnNG1r"
           target="_blank"
           rel="noopener noreferrer"
-          className="text-4xl text-gray-400 hover:text-pink-500 hover:scale-125 transition-all duration-300"
+          className="text-4xl transition-all duration-300"
+          style={{ color: themeColors.text }}
+          onMouseEnter={(e) => (e.currentTarget.style.color = themeColors.socialHoverInstagram)}
+          onMouseLeave={(e) => (e.currentTarget.style.color = themeColors.text)}
         >
           <FaInstagram />
         </a>
@@ -59,7 +95,10 @@ const Contact = () => {
           href="https://www.linkedin.com/in/singhayush1356?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=android_app"
           target="_blank"
           rel="noopener noreferrer"
-          className="text-4xl text-gray-400 hover:text-blue-500 hover:scale-125 transition-all duration-300"
+          className="text-4xl transition-all duration-300"
+          style={{ color: themeColors.text }}
+          onMouseEnter={(e) => (e.currentTarget.style.color = themeColors.socialHoverLinkedin)}
+          onMouseLeave={(e) => (e.currentTarget.style.color = themeColors.text)}
         >
           <FaLinkedin />
         </a>
@@ -68,38 +107,54 @@ const Contact = () => {
       {/* Contact Form */}
       <form
         ref={formRef}
-        className="w-full max-w-lg bg-neutral-900 p-10 rounded-2xl shadow-xl border border-gray-800 space-y-6"
+        className="w-full max-w-lg p-10 rounded-2xl shadow-xl border space-y-6"
+        style={{
+          backgroundColor: themeColors.inputBg,
+          borderColor: themeColors.inputBorder,
+        }}
       >
-        <div>
-          <label className="block text-gray-300 font-medium mb-2">Name</label>
-          <input
-            type="text"
-            placeholder="Enter your name"
-            className="w-full px-4 py-3 rounded-lg bg-black text-white border border-gray-700 focus:ring-2 focus:ring-[#D3FD50] outline-none transition duration-300 hover:border-[#D3FD50]"
-          />
-        </div>
-
-        <div>
-          <label className="block text-gray-300 font-medium mb-2">Email</label>
-          <input
-            type="email"
-            placeholder="Enter your email"
-            className="w-full px-4 py-3 rounded-lg bg-black text-white border border-gray-700 focus:ring-2 focus:ring-[#D3FD50] outline-none transition duration-300 hover:border-[#D3FD50]"
-          />
-        </div>
-
-        <div>
-          <label className="block text-gray-300 font-medium mb-2">Message</label>
-          <textarea
-            rows="5"
-            placeholder="Type your message..."
-            className="w-full px-4 py-3 rounded-lg bg-black text-white border border-gray-700 focus:ring-2 focus:ring-[#D3FD50] outline-none transition duration-300 hover:border-[#D3FD50]"
-          />
-        </div>
+        {["Name", "Email", "Message"].map((label) => (
+          <div key={label}>
+            <label className="block font-medium mb-2" style={{ color: themeColors.text }}>
+              {label}
+            </label>
+            {label === "Message" ? (
+              <textarea
+                rows="5"
+                placeholder={`Type your ${label.toLowerCase()}...`}
+                className="w-full px-4 py-3 rounded-lg outline-none transition duration-300"
+                style={{
+                  backgroundColor: themeColors.inputBg,
+                  border: `1px solid ${themeColors.inputBorder}`,
+                  color: themeColors.text,
+                }}
+                onFocus={(e) => e.currentTarget.style.borderColor = themeColors.focusRing}
+                onBlur={(e) => e.currentTarget.style.borderColor = themeColors.inputBorder}
+              />
+            ) : (
+              <input
+                type={label === "Email" ? "email" : "text"}
+                placeholder={`Enter your ${label.toLowerCase()}`}
+                className="w-full px-4 py-3 rounded-lg outline-none transition duration-300"
+                style={{
+                  backgroundColor: themeColors.inputBg,
+                  border: `1px solid ${themeColors.inputBorder}`,
+                  color: themeColors.text,
+                }}
+                onFocus={(e) => e.currentTarget.style.borderColor = themeColors.focusRing}
+                onBlur={(e) => e.currentTarget.style.borderColor = themeColors.inputBorder}
+              />
+            )}
+          </div>
+        ))}
 
         <button
           type="submit"
-          className="w-full bg-[#D3FD50] text-black py-3 rounded-lg font-semibold hover:scale-[1.05] hover:shadow-lg transition-all duration-300"
+          className="w-full py-3 rounded-lg font-semibold transition-all duration-300 hover:scale-[1.05] hover:shadow-lg"
+          style={{
+            backgroundColor: themeColors.buttonBg,
+            color: themeColors.buttonText,
+          }}
         >
           Send Message
         </button>

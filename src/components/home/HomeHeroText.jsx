@@ -1,14 +1,16 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useContext } from "react";
 import { gsap } from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { ThemeContext } from "../../context/ThemeContext";
 import { Link } from "react-router-dom";
-
-gsap.registerPlugin(ScrollTrigger);
 
 const HomeHeroText = () => {
   const sectionRef = useRef(null);
   const titleRef = useRef(null);
+  const { theme } = useContext(ThemeContext);
 
+  const isDark = theme === "dark";
+
+  // GSAP entrance animations
   useEffect(() => {
     if (!sectionRef.current) return;
 
@@ -46,6 +48,7 @@ const HomeHeroText = () => {
     return () => ctx.revert();
   }, []);
 
+  // FULL-STACK DEVELOPER animated text
   useEffect(() => {
     if (!titleRef.current) return;
 
@@ -77,78 +80,126 @@ const HomeHeroText = () => {
       });
   }, []);
 
+  // Theme-based color palette matching bottom section
+  const colors = {
+    dark: {
+      primary: "#FFD166", // warm yellow
+      secondary: "#4E9EFF", // calm blue
+      subtitle: "#E0E0E0",
+      skillText: "#E0E0E0",
+      skillBorder: "#2C2C2C",
+      bgCircle1: "rgba(78,158,255,0.15)",
+      bgCircle2: "rgba(255,209,102,0.1)",
+      ctaBorder: "#FFD166",
+      ctaHover: "#FFD166",
+      text: "#E0E0E0",
+      bgGradient: "linear-gradient(to bottom, #121212, #1a1a1a)",
+    },
+    light: {
+      primary: "#1D4ED8", // professional blue
+      secondary: "#F59E0B", // amber accent
+      subtitle: "#1F2937",
+      skillText: "#1F2937",
+      skillBorder: "#D1D5DB",
+      bgCircle1: "rgba(59,130,246,0.15)",
+      bgCircle2: "rgba(251,191,36,0.15)",
+      ctaBorder: "#1D4ED8",
+      ctaHover: "#1D4ED8",
+      text: "#1F2937",
+      bgGradient: "linear-gradient(to bottom, #F3F4F6, #E0E7FF)",
+    },
+  };
+
+  const themeColors = isDark ? colors.dark : colors.light;
+
   return (
     <section
       ref={sectionRef}
       className="relative font-[font1] text-center px-6 mt-20 lg:mt-32 min-h-screen flex flex-col items-center justify-center overflow-hidden"
+      style={{ background: themeColors.bgGradient }}
     >
-      {/* Background */}
-      <div className="absolute inset-0 -z-10 bg-gradient-to-b from-black via-[#0e0e0e] to-[#0a0a0a]" />
-      <div className="absolute top-0 left-1/3 w-[700px] h-[700px] bg-[#4E9EFF]/20 rounded-full blur-[180px] animate-pulse-slow -z-10" />
-      <div className="absolute bottom-0 right-0 w-[400px] h-[400px] bg-[#D3FD50]/15 rounded-full blur-[150px] animate-pulse-slower -z-10" />
+      {/* Background Circles */}
+      <div
+        className="absolute top-0 left-1/3 w-[700px] h-[700px] rounded-full blur-[180px] animate-pulse-slow -z-10"
+        style={{ backgroundColor: themeColors.bgCircle1 }}
+      />
+      <div
+        className="absolute bottom-0 right-0 w-[400px] h-[400px] rounded-full blur-[150px] animate-pulse-slower -z-10"
+        style={{ backgroundColor: themeColors.bgCircle2 }}
+      />
 
       {/* Hero Heading */}
-      <h1 className="line text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold uppercase tracking-tight leading-tight group">
+      <h1
+        className="line text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold uppercase tracking-tight leading-tight group"
+        style={{ color: themeColors.text }}
+      >
         Hi,&nbsp;I&#39;m{" "}
-        <span className="relative text-[#4E9EFF] hover:text-[#D3FD50] transition-colors duration-500 cursor-pointer">
+        <span
+          className="relative cursor-pointer transition-colors duration-500 hover:scale-105"
+          style={{ color: themeColors.primary }}
+        >
           Ayush Singh
-          <span className="underline absolute left-0 bottom-0 h-[3px] bg-[#D3FD50] block scale-x-0 origin-left transition-transform duration-500 group-hover:scale-x-100" />
+          <span
+            className="underline absolute left-0 bottom-0 h-[3px] block scale-x-0 origin-left transition-transform duration-500 group-hover:scale-x-100"
+            style={{ backgroundColor: themeColors.secondary }}
+          />
         </span>
       </h1>
 
       {/* Animated FULL-STACK Text */}
       <h2
         ref={titleRef}
-        className="mt-4 text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold uppercase tracking-tight text-[#D3FD50] flex gap-1 justify-center"
+        className="mt-4 text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold uppercase tracking-tight flex gap-1 justify-center"
+        style={{ color: themeColors.secondary }}
       />
 
       {/* Subtitle */}
-      <p className="subtitle mt-6 text-gray-300 text-base sm:text-lg md:text-xl lg:text-2xl max-w-3xl mx-auto leading-relaxed">
+      <p
+        className="subtitle mt-6 text-base sm:text-lg md:text-xl lg:text-2xl max-w-3xl mx-auto leading-relaxed"
+        style={{ color: themeColors.subtitle }}
+      >
         Crafting scalable, user-centric applications with{" "}
-        <span className="text-[#4E9EFF] hover:text-[#D3FD50] transition-colors duration-300 cursor-pointer">
-          React
-        </span>
-        ,{" "}
-        <span className="text-[#D3FD50] hover:text-[#4E9EFF] transition-colors duration-300 cursor-pointer">
-          Node.js
-        </span>
-        , and clean, optimized backend systems.
+        <span style={{ color: themeColors.primary }}>React</span>,{" "}
+        <span style={{ color: themeColors.secondary }}>Node.js</span>, and clean, optimized backend systems.
       </p>
 
       {/* Skill Badges */}
       <div className="flex flex-wrap justify-center gap-3 mt-10">
-        {[
-          "React.js",
-          "Node.js",
-          "Express.js",
-          "MongoDB",
-          "SQL",
-          "ASP.NET",
-          "GSAP",
-          "UI/UX",
-        ].map((skill) => (
-          <span
-            key={skill}
-            className="skill-pill border border-gray-700 text-gray-200 px-4 py-2 rounded-full text-sm sm:text-base backdrop-blur-md hover:border-[#4E9EFF] hover:text-[#4E9EFF] hover:shadow-[0px_0px_15px_rgba(78,158,255,0.6)] hover:scale-110 transition-all duration-300 cursor-pointer"
-          >
-            {skill}
-          </span>
-        ))}
+        {["React.js", "Node.js", "Express.js", "MongoDB", "SQL", "ASP.NET", "GSAP", "UI/UX"].map(
+          (skill) => (
+            <span
+              key={skill}
+              className="skill-pill border px-4 py-2 rounded-full text-sm sm:text-base backdrop-blur-md hover:shadow-[0px_0px_15px_rgba(78,158,255,0.6)] hover:scale-110 transition-all duration-300 cursor-pointer"
+              style={{
+                borderColor: themeColors.skillBorder,
+                color: themeColors.skillText,
+              }}
+            >
+              {skill}
+            </span>
+          )
+        )}
       </div>
 
       {/* CTA Buttons */}
-      <div className="flex gap-6 mt-10">
+      <div className="flex gap-6 mt-10 flex-wrap justify-center">
         <Link
           to="/projects"
-          aria-label="View my projects"
-          className="btn-link px-8 py-4 border-2 border-white rounded-full uppercase font-semibold text-lg tracking-wide transition-all duration-300 hover:scale-110 hover:border-[#D3FD50] hover:text-[#D3FD50] hover:shadow-[0px_10px_40px_rgba(211,253,80,0.5)] hover:-translate-y-1"
+          className="btn-link px-8 py-4 border-2 rounded-full uppercase font-semibold text-lg tracking-wide transition-all duration-300 hover:scale-110 hover:-translate-y-1"
+          style={{
+            borderColor: themeColors.ctaBorder,
+            color: themeColors.ctaBorder,
+          }}
         >
           View Projects
         </Link>
         <Link
           to="/about"
-          aria-label="Learn more about me"
-          className="btn-link px-8 py-4 border-2 border-white rounded-full uppercase font-semibold text-lg tracking-wide transition-all duration-300 hover:scale-110 hover:border-[#4E9EFF] hover:text-[#4E9EFF] hover:shadow-[0px_10px_40px_rgba(78,158,255,0.5)] hover:-translate-y-1"
+          className="btn-link px-8 py-4 border-2 rounded-full uppercase font-semibold text-lg tracking-wide transition-all duration-300 hover:scale-110 hover:-translate-y-1"
+          style={{
+            borderColor: themeColors.secondary,
+            color: themeColors.secondary,
+          }}
         >
           About Me
         </Link>

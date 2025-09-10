@@ -1,14 +1,43 @@
+// src/pages/About.jsx
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/all";
-import { useRef } from "react";
+import { useRef, useContext } from "react";
+import { ThemeContext } from "../context/ThemeContext";
 
 const About = () => {
   gsap.registerPlugin(ScrollTrigger);
 
+  const { theme } = useContext(ThemeContext);
+  const isDark = theme === "dark";
+
   const heroRef = useRef(null);
   const photoRef = useRef(null);
   const skillsRef = useRef(null);
+
+  // Theme colors
+  const colors = {
+    dark: {
+      bg: "#0a0a0a",
+      sectionBg: "#111",
+      text: "#cfcfcf",
+      accent: "#f59e0b", // amber
+      skillCardBg: "rgba(0,0,0,0.6)",
+      buttonBg: "#f59e0b",
+      buttonText: "#000",
+    },
+    light: {
+      bg: "#f9fafb",
+      sectionBg: "#e6eef9",
+      text: "#1f2937",
+      accent: "#2563eb", // professional blue
+      skillCardBg: "rgba(255,255,255,0.6)",
+      buttonBg: "#2563eb",
+      buttonText: "#fff",
+    },
+  };
+
+  const themeColors = isDark ? colors.dark : colors.light;
 
   // GSAP Animations
   useGSAP(() => {
@@ -58,7 +87,7 @@ const About = () => {
   ];
 
   return (
-    <div className="bg-black text-white font-[font2]">
+    <div className="font-[font2]" style={{ backgroundColor: themeColors.bg, color: themeColors.text }}>
       {/* Hero Section */}
       <section
         ref={heroRef}
@@ -69,7 +98,7 @@ const About = () => {
           <h1 className="animate text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold uppercase leading-tight">
             Hi, I'm Ayush
           </h1>
-          <p className="animate text-gray-300 text-base sm:text-lg md:text-xl lg:text-2xl leading-relaxed max-w-xl mx-auto lg:mx-0">
+          <p className="animate text-base sm:text-lg md:text-xl lg:text-2xl leading-relaxed max-w-xl mx-auto lg:mx-0">
             I’m a Full Stack Developer turning ideas into modern, high-performing
             web applications. I specialize in React.js, Node.js, and complete
             end-to-end solutions that combine UI/UX with scalable backend systems.
@@ -87,7 +116,7 @@ const About = () => {
       </section>
 
       {/* Skills Section */}
-      <section ref={skillsRef} className="py-16 px-6 lg:px-20 bg-[#111]">
+      <section ref={skillsRef} className="py-16 px-6 lg:px-20" style={{ backgroundColor: themeColors.sectionBg }}>
         <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-center mb-10">
           My Skills
         </h2>
@@ -95,19 +124,20 @@ const About = () => {
           {skills.map((skill, idx) => (
             <div
               key={idx}
-              className="skill-card p-6 bg-black/60 border border-white/10 rounded-2xl hover:scale-105 transition-transform duration-300 shadow-lg"
+              className="skill-card p-6 border rounded-2xl hover:scale-105 transition-transform duration-300 shadow-lg"
+              style={{ backgroundColor: themeColors.skillCardBg, borderColor: themeColors.text }}
             >
-              <h3 className="text-xl sm:text-2xl font-semibold mb-3 text-[#D3FD50]">
+              <h3 className="text-xl sm:text-2xl font-semibold mb-3" style={{ color: themeColors.accent }}>
                 {skill.title}
               </h3>
-              <p className="text-gray-300 text-sm sm:text-base">{skill.desc}</p>
+              <p className="text-sm sm:text-base">{skill.desc}</p>
             </div>
           ))}
         </div>
       </section>
 
       {/* Call To Action */}
-      <section className="py-16 bg-[#D3FD50] text-black text-center px-6">
+      <section className="py-16 text-center px-6" style={{ backgroundColor: themeColors.accent, color: themeColors.buttonText }}>
         <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-4">Let’s Connect</h2>
         <p className="max-w-xl mx-auto mb-6 text-base sm:text-lg lg:text-xl">
           Have a project idea or need a full-stack solution? Let’s build something
@@ -115,7 +145,8 @@ const About = () => {
         </p>
         <a
           href="/contact"
-          className="px-6 sm:px-8 py-3 sm:py-4 bg-black text-white rounded-full font-semibold hover:scale-105 transition-transform duration-300 shadow-lg inline-block text-sm sm:text-base"
+          className="px-6 sm:px-8 py-3 sm:py-4 rounded-full font-semibold hover:scale-105 transition-transform duration-300 shadow-lg inline-block text-sm sm:text-base"
+          style={{ backgroundColor: themeColors.buttonBg, color: themeColors.buttonText }}
         >
           Contact Me
         </a>
