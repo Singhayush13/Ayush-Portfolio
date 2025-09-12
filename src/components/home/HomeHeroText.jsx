@@ -7,7 +7,6 @@ const HomeHeroText = () => {
   const sectionRef = useRef(null);
   const titleRef = useRef(null);
   const { theme } = useContext(ThemeContext);
-
   const isDark = theme === "dark";
 
   // GSAP entrance animations
@@ -80,11 +79,11 @@ const HomeHeroText = () => {
       });
   }, []);
 
-  // Theme-based color palette matching bottom section
+  // Theme-based color palette
   const colors = {
     dark: {
-      primary: "#FFD166", // warm yellow
-      secondary: "#4E9EFF", // calm blue
+      primary: "#FFD166",
+      secondary: "#4E9EFF",
       subtitle: "#E0E0E0",
       skillText: "#E0E0E0",
       skillBorder: "#2C2C2C",
@@ -96,8 +95,8 @@ const HomeHeroText = () => {
       bgGradient: "linear-gradient(to bottom, #121212, #1a1a1a)",
     },
     light: {
-      primary: "#1D4ED8", // professional blue
-      secondary: "#F59E0B", // amber accent
+      primary: "#1D4ED8",
+      secondary: "#F59E0B",
       subtitle: "#1F2937",
       skillText: "#1F2937",
       skillBorder: "#D1D5DB",
@@ -115,7 +114,7 @@ const HomeHeroText = () => {
   return (
     <section
       ref={sectionRef}
-      className="relative font-[font1] text-center px-6 mt-20 lg:mt-32 min-h-screen flex flex-col items-center justify-center overflow-hidden"
+      className="relative font-[font1] text-center px-6 pt-6 lg:pt-12 min-h-[80vh] flex flex-col items-center justify-center overflow-hidden"
       style={{ background: themeColors.bgGradient }}
     >
       {/* Background Circles */}

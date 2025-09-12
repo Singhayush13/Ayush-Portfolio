@@ -1,8 +1,7 @@
-// src/pages/About.jsx
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/all";
-import { useRef, useContext } from "react";
+import { useRef, useContext, useEffect } from "react";
 import { ThemeContext } from "../context/ThemeContext";
 
 const About = () => {
@@ -15,13 +14,18 @@ const About = () => {
   const photoRef = useRef(null);
   const skillsRef = useRef(null);
 
+  // Scroll to top on page load
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, []);
+
   // Theme colors
   const colors = {
     dark: {
       bg: "#0a0a0a",
       sectionBg: "#111",
       text: "#cfcfcf",
-      accent: "#f59e0b", // amber
+      accent: "#f59e0b",
       skillCardBg: "rgba(0,0,0,0.6)",
       buttonBg: "#f59e0b",
       buttonText: "#000",
@@ -30,7 +34,7 @@ const About = () => {
       bg: "#f9fafb",
       sectionBg: "#e6eef9",
       text: "#1f2937",
-      accent: "#2563eb", // professional blue
+      accent: "#2563eb",
       skillCardBg: "rgba(255,255,255,0.6)",
       buttonBg: "#2563eb",
       buttonText: "#fff",
