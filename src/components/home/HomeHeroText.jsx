@@ -20,34 +20,31 @@ const HomeHeroText = () => {
         ".line",
         { y: 80, opacity: 0, skewY: 5 },
         { y: 0, opacity: 1, skewY: 0, stagger: 0.25 }
-      );
-
-      tl.fromTo(
-        ".underline",
-        { width: 0 },
-        { width: "100%", duration: 1, ease: "power2.out" },
-        "-=0.5"
-      );
-
-      tl.fromTo(
-        ".subtitle",
-        { y: 40, opacity: 0 },
-        { y: 0, opacity: 1 },
-        "-=0.3"
-      );
-
-      tl.fromTo(
-        ".skill-pill",
-        { y: 20, opacity: 0 },
-        { y: 0, opacity: 1, stagger: 0.1 },
-        "-=0.3"
-      );
+      )
+        .fromTo(
+          ".underline",
+          { width: 0 },
+          { width: "100%", duration: 1, ease: "power2.out" },
+          "-=0.5"
+        )
+        .fromTo(
+          ".subtitle",
+          { y: 40, opacity: 0 },
+          { y: 0, opacity: 1 },
+          "-=0.3"
+        )
+        .fromTo(
+          ".skill-pill",
+          { y: 20, opacity: 0 },
+          { y: 0, opacity: 1, stagger: 0.1 },
+          "-=0.3"
+        );
     }, sectionRef);
 
     return () => ctx.revert();
   }, []);
 
-  // FULL-STACK DEVELOPER animated text
+  // FULL-STACK DEVELOPER animated text (responsive)
   useEffect(() => {
     if (!titleRef.current) return;
 
@@ -58,7 +55,7 @@ const HomeHeroText = () => {
     const chars = text.split("").map((char) => {
       const span = document.createElement("span");
       span.textContent = char;
-      span.classList.add("char");
+      span.classList.add("char", "inline-block");
       container.appendChild(span);
       return span;
     });
@@ -79,7 +76,7 @@ const HomeHeroText = () => {
       });
   }, []);
 
-  // Theme-based color palette
+  // Theme colors
   const colors = {
     dark: {
       primary: "#FFD166",
@@ -114,7 +111,7 @@ const HomeHeroText = () => {
   return (
     <section
       ref={sectionRef}
-      className="relative font-[font1] text-center px-6 pt-6 lg:pt-12 min-h-[80vh] flex flex-col items-center justify-center overflow-hidden"
+      className="relative font-[font1] text-center px-4 sm:px-6 pt-6 lg:pt-12 min-h-[80vh] flex flex-col items-center justify-center overflow-hidden"
       style={{ background: themeColors.bgGradient }}
     >
       {/* Background Circles */}
@@ -129,12 +126,12 @@ const HomeHeroText = () => {
 
       {/* Hero Heading */}
       <h1
-        className="line text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold uppercase tracking-tight leading-tight group"
+        className="line text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold uppercase tracking-tight leading-tight group"
         style={{ color: themeColors.text }}
       >
         Hi,&nbsp;I&#39;m{" "}
         <span
-          className="relative cursor-pointer transition-colors duration-500 hover:scale-105"
+          className="relative cursor-pointer transition-transform duration-500 hover:scale-105"
           style={{ color: themeColors.primary }}
         >
           Ayush Singh
@@ -148,13 +145,13 @@ const HomeHeroText = () => {
       {/* Animated FULL-STACK Text */}
       <h2
         ref={titleRef}
-        className="mt-4 text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold uppercase tracking-tight flex gap-1 justify-center"
+        className="mt-4 text-xl sm:text-3xl md:text-4xl lg:text-5xl font-bold uppercase tracking-tight flex flex-wrap gap-1 justify-center text-center leading-snug"
         style={{ color: themeColors.secondary }}
       />
 
       {/* Subtitle */}
       <p
-        className="subtitle mt-6 text-base sm:text-lg md:text-xl lg:text-2xl max-w-3xl mx-auto leading-relaxed"
+        className="subtitle mt-6 text-sm sm:text-lg md:text-xl lg:text-2xl max-w-3xl mx-auto leading-relaxed"
         style={{ color: themeColors.subtitle }}
       >
         Crafting scalable, user-centric applications with{" "}
@@ -163,12 +160,12 @@ const HomeHeroText = () => {
       </p>
 
       {/* Skill Badges */}
-      <div className="flex flex-wrap justify-center gap-3 mt-10">
+      <div className="flex flex-wrap justify-center gap-3 mt-8 sm:mt-10">
         {["React.js", "Node.js", "Express.js", "MongoDB", "SQL", "ASP.NET", "GSAP", "UI/UX"].map(
           (skill) => (
             <span
               key={skill}
-              className="skill-pill border px-4 py-2 rounded-full text-sm sm:text-base backdrop-blur-md hover:shadow-[0px_0px_15px_rgba(78,158,255,0.6)] hover:scale-110 transition-all duration-300 cursor-pointer"
+              className="skill-pill border px-4 py-2 rounded-full text-xs sm:text-sm md:text-base backdrop-blur-md hover:shadow-[0px_0px_15px_rgba(78,158,255,0.6)] hover:scale-110 transition-all duration-300 cursor-pointer"
               style={{
                 borderColor: themeColors.skillBorder,
                 color: themeColors.skillText,
@@ -181,10 +178,10 @@ const HomeHeroText = () => {
       </div>
 
       {/* CTA Buttons */}
-      <div className="flex gap-6 mt-10 flex-wrap justify-center">
+      <div className="flex gap-4 sm:gap-6 mt-8 sm:mt-10 flex-wrap justify-center">
         <Link
           to="/projects"
-          className="btn-link px-8 py-4 border-2 rounded-full uppercase font-semibold text-lg tracking-wide transition-all duration-300 hover:scale-110 hover:-translate-y-1"
+          className="btn-link px-6 sm:px-8 py-3 sm:py-4 border-2 rounded-full uppercase font-semibold text-base sm:text-lg tracking-wide transition-all duration-300 hover:scale-110 hover:-translate-y-1"
           style={{
             borderColor: themeColors.ctaBorder,
             color: themeColors.ctaBorder,
@@ -194,7 +191,7 @@ const HomeHeroText = () => {
         </Link>
         <Link
           to="/about"
-          className="btn-link px-8 py-4 border-2 rounded-full uppercase font-semibold text-lg tracking-wide transition-all duration-300 hover:scale-110 hover:-translate-y-1"
+          className="btn-link px-6 sm:px-8 py-3 sm:py-4 border-2 rounded-full uppercase font-semibold text-base sm:text-lg tracking-wide transition-all duration-300 hover:scale-110 hover:-translate-y-1"
           style={{
             borderColor: themeColors.secondary,
             color: themeColors.secondary,
