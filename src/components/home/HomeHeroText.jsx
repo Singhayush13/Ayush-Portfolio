@@ -5,11 +5,12 @@ import { Link } from "react-router-dom";
 
 const HomeHeroText = () => {
   const sectionRef = useRef(null);
-  const titleRef = useRef(null);
+  const fullStackRef = useRef(null);
+  const developerRef = useRef(null);
   const { theme } = useContext(ThemeContext);
   const isDark = theme === "dark";
 
-  // GSAP entrance animations
+  // Section entrance animation
   useEffect(() => {
     if (!sectionRef.current) return;
 
@@ -44,64 +45,63 @@ const HomeHeroText = () => {
     return () => ctx.revert();
   }, []);
 
-  // FULL-STACK DEVELOPER animated text (responsive)
+  // Looping animation for FULL-STACK + DEVELOPER
   useEffect(() => {
-    if (!titleRef.current) return;
+    if (!fullStackRef.current || !developerRef.current) return;
 
-    const text = "FULL-STACK DEVELOPER";
-    const container = titleRef.current;
-    container.innerHTML = "";
+    const letters = fullStackRef.current.querySelectorAll(".letter");
 
-    const chars = text.split("").map((char) => {
-      const span = document.createElement("span");
-      span.textContent = char;
-      span.classList.add("char", "inline-block");
-      container.appendChild(span);
-      return span;
-    });
-
-    gsap.timeline({ repeat: -1, repeatDelay: 0.5 })
+    const tl = gsap.timeline({ repeat: -1, repeatDelay: 1 }); // infinite loop
+    tl.fromTo(
+      letters,
+      { opacity: 0, y: 20 },
+      {
+        opacity: 1,
+        y: 0,
+        stagger: 0.05,
+        ease: "power3.out",
+        duration: 0.6,
+      }
+    )
       .fromTo(
-        chars,
-        { opacity: 0, y: 20 },
-        { opacity: 1, y: 0, stagger: 0.05, ease: "power3.out", duration: 0.6 }
+        developerRef.current,
+        { opacity: 0, scale: 0.85, y: 15 },
+        {
+          opacity: 1,
+          scale: 1,
+          y: 0,
+          ease: "back.out(1.6)",
+          duration: 0.6,
+        },
+        "-=0.25"
       )
-      .to(chars, {
-        opacity: 0,
-        y: -10,
-        stagger: 0.03,
-        ease: "power2.in",
-        duration: 0.4,
-        delay: 1,
-      });
+      .to(
+        [letters, developerRef.current],
+        { opacity: 0, duration: 0.4, ease: "power1.inOut", delay: 2 }
+      ); // fade out before looping
   }, []);
 
-  // Theme colors
   const colors = {
     dark: {
-      primary: "#FFD166",
-      secondary: "#4E9EFF",
       subtitle: "#E0E0E0",
       skillText: "#E0E0E0",
       skillBorder: "#2C2C2C",
       bgCircle1: "rgba(78,158,255,0.15)",
       bgCircle2: "rgba(255,209,102,0.1)",
       ctaBorder: "#FFD166",
-      ctaHover: "#FFD166",
       text: "#E0E0E0",
+      highlight: "#F59E0B", // Orange in dark mode
       bgGradient: "linear-gradient(to bottom, #121212, #1a1a1a)",
     },
     light: {
-      primary: "#1D4ED8",
-      secondary: "#F59E0B",
       subtitle: "#1F2937",
       skillText: "#1F2937",
       skillBorder: "#D1D5DB",
       bgCircle1: "rgba(59,130,246,0.15)",
       bgCircle2: "rgba(251,191,36,0.15)",
       ctaBorder: "#1D4ED8",
-      ctaHover: "#1D4ED8",
       text: "#1F2937",
+      highlight: "#1D4ED8", // Blue in light mode
       bgGradient: "linear-gradient(to bottom, #F3F4F6, #E0E7FF)",
     },
   };
@@ -124,7 +124,7 @@ const HomeHeroText = () => {
         style={{ backgroundColor: themeColors.bgCircle2 }}
       />
 
-      {/* Hero Heading */}
+      {/* Heading */}
       <h1
         className="line text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold uppercase tracking-tight leading-tight group"
         style={{ color: themeColors.text }}
@@ -132,22 +132,38 @@ const HomeHeroText = () => {
         Hi,&nbsp;I&#39;m{" "}
         <span
           className="relative cursor-pointer transition-transform duration-500 hover:scale-105"
-          style={{ color: themeColors.primary }}
+          style={{ color: themeColors.highlight }}
         >
           Ayush Singh
           <span
             className="underline absolute left-0 bottom-0 h-[3px] block scale-x-0 origin-left transition-transform duration-500 group-hover:scale-x-100"
-            style={{ backgroundColor: themeColors.secondary }}
+            style={{ backgroundColor: themeColors.highlight }}
           />
         </span>
       </h1>
 
-      {/* Animated FULL-STACK Text */}
-      <h2
-        ref={titleRef}
-        className="mt-4 text-xl sm:text-3xl md:text-4xl lg:text-5xl font-bold uppercase tracking-tight flex flex-wrap gap-1 justify-center text-center leading-snug"
-        style={{ color: themeColors.secondary }}
-      />
+      {/* FULL-STACK + DEVELOPER */}
+      <div className="mt-4 flex flex-col md:flex-row md:gap-3 items-center">
+        <div
+          ref={fullStackRef}
+          className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight uppercase inline-block"
+          style={{ color: themeColors.highlight }}
+        >
+          {"FULL-STACK".split("").map((char, i) => (
+            <span key={i} className="letter inline-block">
+              {char}
+            </span>
+          ))}
+        </div>
+
+        <div
+          ref={developerRef}
+          className="mt-1 md:mt-0 text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight uppercase"
+          style={{ color: themeColors.highlight }}
+        >
+          DEVELOPER
+        </div>
+      </div>
 
       {/* Subtitle */}
       <p
@@ -155,26 +171,33 @@ const HomeHeroText = () => {
         style={{ color: themeColors.subtitle }}
       >
         Crafting scalable, user-centric applications with{" "}
-        <span style={{ color: themeColors.primary }}>React</span>,{" "}
-        <span style={{ color: themeColors.secondary }}>Node.js</span>, and clean, optimized backend systems.
+        <span className="text-blue-500">React</span>,{" "}
+        <span className="text-yellow-500">Node.js</span>, and clean, optimized backend systems.
       </p>
 
-      {/* Skill Badges */}
+      {/* Skill Pills */}
       <div className="flex flex-wrap justify-center gap-3 mt-8 sm:mt-10">
-        {["React.js", "Node.js", "Express.js", "MongoDB", "SQL", "ASP.NET", "GSAP", "UI/UX"].map(
-          (skill) => (
-            <span
-              key={skill}
-              className="skill-pill border px-4 py-2 rounded-full text-xs sm:text-sm md:text-base backdrop-blur-md hover:shadow-[0px_0px_15px_rgba(78,158,255,0.6)] hover:scale-110 transition-all duration-300 cursor-pointer"
-              style={{
-                borderColor: themeColors.skillBorder,
-                color: themeColors.skillText,
-              }}
-            >
-              {skill}
-            </span>
-          )
-        )}
+        {[
+          "React.js",
+          "Node.js",
+          "Express.js",
+          "MongoDB",
+          "SQL",
+          "ASP.NET",
+          "GSAP",
+          "UI/UX",
+        ].map((skill) => (
+          <span
+            key={skill}
+            className="skill-pill border px-4 py-2 rounded-full text-xs sm:text-sm md:text-base backdrop-blur-md hover:shadow-[0px_0px_15px_rgba(78,158,255,0.6)] hover:scale-110 transition-all duration-300 cursor-pointer"
+            style={{
+              borderColor: themeColors.skillBorder,
+              color: themeColors.skillText,
+            }}
+          >
+            {skill}
+          </span>
+        ))}
       </div>
 
       {/* CTA Buttons */}
@@ -193,8 +216,8 @@ const HomeHeroText = () => {
           to="/about"
           className="btn-link px-6 sm:px-8 py-3 sm:py-4 border-2 rounded-full uppercase font-semibold text-base sm:text-lg tracking-wide transition-all duration-300 hover:scale-110 hover:-translate-y-1"
           style={{
-            borderColor: themeColors.secondary,
-            color: themeColors.secondary,
+            borderColor: "#F59E0B",
+            color: "#F59E0B",
           }}
         >
           About Me
