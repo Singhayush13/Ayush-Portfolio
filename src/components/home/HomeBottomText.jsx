@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useContext } from "react";
+import React, { useEffect, useRef, useContext, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
@@ -7,156 +7,182 @@ import { ThemeContext } from "../../context/ThemeContext";
 gsap.registerPlugin(ScrollTrigger);
 
 const HomeBottomText = () => {
-  const bottomRef = useRef(null);
+  const sectionRef = useRef(null);
+  const buttonsRef = useRef([]);
   const { theme } = useContext(ThemeContext);
   const isDark = theme === "dark";
 
-  const colors = {
-    dark: {
-      bgGradient: "linear-gradient(to right, #101010, #0a0a0a)",
-      border: "#2c2c2c",
-      text: "#cfcfcf",
-      accent1: "#f59e0b",
-      accent2: "#fbbf24",
-      buttonBg: "transparent",
-      buttonBorder: "#f59e0b",
-      buttonText: "#f59e0b",
-      glowTop: "rgba(245,158,11,0.15)",
-      glowBottom: "rgba(251,191,36,0.1)",
-      footerText: "#9ca3af", // softer gray for footer
-    },
-    light: {
-      bgGradient: "linear-gradient(to right, #f9fafb, #e6eef9)",
-      border: "#d1d5db",
+  const isTouch =
+    typeof window !== "undefined" &&
+    window.matchMedia("(pointer: coarse)").matches;
+
+  /* ---------------- COLORS ---------------- */
+  const colors = useMemo(() => {
+    if (isDark) {
+      return {
+        bg: "linear-gradient(135deg,#0b0b0b,#111827)",
+        border: "#1f2937",
+        text: "#d1d5db",
+        primary: "#f59e0b",
+        secondary: "#fbbf24",
+        ripple: "rgba(245,158,11,.25)",
+        footer: "#9ca3af",
+      };
+    }
+    return {
+      bg: "linear-gradient(135deg,#f8fafc,#eef2ff)",
+      border: "#cbd5e1",
       text: "#1f2937",
-      accent1: "#2563eb",
-      accent2: "#3b82f6",
-      buttonBg: "#e0efff",
-      buttonBorder: "#2563eb",
-      buttonText: "#2563eb",
-      glowTop: "rgba(78,158,255,0.15)",
-      glowBottom: "rgba(0,123,255,0.1)",
-      footerText: "#6b7280", // gray for light mode footer
-    },
-  };
+      primary: "#2563eb",
+      secondary: "#3b82f6",
+      ripple: "rgba(37,99,235,.25)",
+      footer: "#64748b",
+    };
+  }, [isDark]);
 
-  const themeColors = isDark ? colors.dark : colors.light;
-
-  // GSAP scroll animations
+  /* ---------------- SCROLL ANIMATION ---------------- */
   useEffect(() => {
     const ctx = gsap.context(() => {
-      const tl = gsap.timeline({
+      gsap.from(".bottom-reveal", {
+        y: 40,
+        opacity: 0,
+        stagger: 0.2,
+        duration: 1,
+        ease: "power3.out",
         scrollTrigger: {
-          trigger: bottomRef.current,
-          start: "top 85%",
-          toggleActions: "play none none reverse",
+          trigger: sectionRef.current,
+          start: "top 80%",
         },
-        defaults: { ease: "power3.out", duration: 1 },
       });
-
-      tl.fromTo(".tagline", { y: 60, opacity: 0 }, { y: 0, opacity: 1 });
-      tl.fromTo(
-        ".btn-link",
-        { y: 40, opacity: 0 },
-        { y: 0, opacity: 1, stagger: 0.2 },
-        "-=0.4"
-      );
-    }, bottomRef);
-
+    }, sectionRef);
     return () => ctx.revert();
   }, []);
 
-  // Button hover parallax
+  /* ---------------- PROFESSIONAL MAGNETIC EFFECT ---------------- */
   useEffect(() => {
-    const buttons = bottomRef.current.querySelectorAll(".btn-link");
+    if (isTouch) return; // 🚫 disable on mobile
 
-    buttons.forEach((btn) => {
-      btn.addEventListener("mousemove", (e) => {
+    buttonsRef.current.forEach((btn) => {
+      if (!btn) return;
+
+      const content = btn.querySelector(".btn-content");
+
+      const move = (e) => {
         const rect = btn.getBoundingClientRect();
-        const x = e.clientX - rect.left;
-        const y = e.clientY - rect.top;
-        gsap.to(btn, {
-          x: (x - rect.width / 2) * 0.08,
-          y: (y - rect.height / 2) * 0.08,
-          scale: 1.05,
-          duration: 0.3,
-        });
-      });
+        const relX = e.clientX - rect.left - rect.width / 2;
+        const relY = e.clientY - rect.top - rect.height / 2;
 
-      btn.addEventListener("mouseleave", () => {
-        gsap.to(btn, { x: 0, y: 0, scale: 1, duration: 0.3 });
-      });
+        gsap.to(content, {
+          x: relX * 0.35, // ✔ strong but controlled
+          y: relY * 0.35,
+          duration: 0.35,
+          ease: "power3.out",
+        });
+      };
+
+      const reset = () => {
+        gsap.to(content, {
+          x: 0,
+          y: 0,
+          duration: 0.6,
+          ease: "elastic.out(1,0.4)",
+        });
+      };
+
+      btn.addEventListener("mousemove", move);
+      btn.addEventListener("mouseleave", reset);
+
+      return () => {
+        btn.removeEventListener("mousemove", move);
+        btn.removeEventListener("mouseleave", reset);
+      };
     });
-  }, []);
+  }, [isTouch]);
+
+  /* ---------------- RIPPLE (SUBTLE) ---------------- */
+  const ripple = (e) => {
+    if (isTouch) return;
+
+    const btn = e.currentTarget;
+    const rect = btn.getBoundingClientRect();
+    const span = document.createElement("span");
+
+    span.style.position = "absolute";
+    span.style.left = `${e.clientX - rect.left}px`;
+    span.style.top = `${e.clientY - rect.top}px`;
+    span.style.width = span.style.height = "20px";
+    span.style.background = colors.ripple;
+    span.style.borderRadius = "999px";
+    span.style.transform = "translate(-50%, -50%)";
+    span.style.pointerEvents = "none";
+
+    btn.appendChild(span);
+
+    gsap.to(span, {
+      scale: 14,
+      opacity: 0,
+      duration: 0.8,
+      ease: "power3.out",
+      onComplete: () => span.remove(),
+    });
+  };
 
   return (
     <>
       <section
-        ref={bottomRef}
-        className="relative font-[font2] flex flex-col lg:flex-row items-center justify-between gap-12 lg:gap-0 px-6 py-24 rounded-3xl border shadow-2xl overflow-hidden mt-20 scroll-smooth"
-        style={{
-          background: themeColors.bgGradient,
-          borderColor: themeColors.border,
-        }}
+        ref={sectionRef}
+        className="relative px-6 py-24 mt-20 rounded-3xl border shadow-xl overflow-hidden"
+        style={{ background: colors.bg, borderColor: colors.border }}
       >
-        {/* Accent Glow */}
-        <div
-          className="absolute top-0 left-0 w-96 h-96 blur-[150px] -z-10"
-          style={{ backgroundColor: themeColors.glowTop }}
-        />
-        <div
-          className="absolute bottom-0 right-0 w-72 h-72 blur-[150px] -z-10"
-          style={{ backgroundColor: themeColors.glowBottom }}
-        />
-
-        {/* Tagline */}
         <p
-          className="tagline lg:w-[45%] w-full font-[font1] text-lg sm:text-xl lg:text-2xl leading-relaxed text-center lg:text-left"
-          style={{ color: themeColors.text }}
+          className="bottom-reveal text-center max-w-4xl mx-auto text-lg sm:text-xl lg:text-2xl leading-relaxed"
+          style={{ color: colors.text }}
         >
-          🚀 Turning{" "}
-          <span style={{ color: themeColors.accent1, fontWeight: 600 }}>ideas</span> into{" "}
-          <span style={{ color: themeColors.accent2, fontWeight: 600 }}>impactful solutions</span> with code
-          that is clean, maintainable, and designed for scalability.
+          Turning{" "}
+          <span style={{ color: colors.primary, fontWeight: 600 }}>ideas</span>{" "}
+          into{" "}
+          <span style={{ color: colors.secondary, fontWeight: 600 }}>
+            scalable digital solutions
+          </span>{" "}
+          with clean, maintainable and performance-driven code.
         </p>
 
-        {/* Buttons */}
-        <div className="btn-group flex flex-col sm:flex-row gap-6 lg:gap-10 mt-8 lg:mt-0">
-          <Link
-            to="/resume"
-            onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-            className="btn-link h-20 sm:h-24 w-48 sm:w-60 flex items-center justify-center border-2 rounded-full uppercase font-semibold text-lg sm:text-xl lg:text-2xl tracking-wide transition-all duration-300"
-            style={{
-              borderColor: themeColors.buttonBorder,
-              color: themeColors.buttonText,
-              backgroundColor: themeColors.buttonBg,
-            }}
-          >
-            View Resume
-          </Link>
-
-          <Link
-            to="/contact"
-            className="btn-link h-20 sm:h-24 w-48 sm:w-60 flex items-center justify-center border-2 rounded-full uppercase font-semibold text-lg sm:text-xl lg:text-2xl tracking-wide transition-all duration-300"
-            style={{
-              borderColor: themeColors.buttonBorder,
-              color: themeColors.buttonText,
-              backgroundColor: isDark ? "transparent" : "#dbeafe",
-            }}
-          >
-            Hire Me
-          </Link>
+        <div className="bottom-reveal mt-14 flex flex-col sm:flex-row gap-8 justify-center">
+          {[
+            { text: "View Resume", link: "/resume", outline: true },
+            { text: "Hire Me", link: "/contact", outline: false },
+          ].map((b, i) => (
+            <Link
+              key={b.text}
+              ref={(el) => (buttonsRef.current[i] = el)}
+              to={b.link}
+              onClick={ripple}
+              className="relative overflow-hidden h-20 w-60 rounded-full flex items-center justify-center uppercase font-semibold tracking-wide"
+              style={{
+                border: b.outline ? `2px solid ${colors.primary}` : "none",
+                background: b.outline ? "transparent" : colors.primary,
+                color: b.outline ? colors.primary : "#fff",
+              }}
+            >
+              <span className="btn-content relative z-10">
+                {b.text}
+              </span>
+            </Link>
+          ))}
         </div>
+
+        <p className="bottom-reveal mt-10 text-center text-sm opacity-80">
+          I usually reply within <strong>24 hours</strong>.  
+          Let’s build something impactful.
+        </p>
       </section>
 
-      {/* Professional Footer */}
       <footer
-        className="w-full text-center mt-12 mb-6 font-[font1] text-base sm:text-lg md:text-xl tracking-wide uppercase"
-        style={{ color: themeColors.footerText }}
+        className="text-center mt-10 text-sm uppercase"
+        style={{ color: colors.footer }}
       >
-        <span>Coded with </span>
-        <span className="text-red-500 animate-pulse">♥</span>
-        <span> by <strong>Ayush Singh</strong></span>
+        Crafted with <span className="text-red-500">♥</span> by{" "}
+        <strong>Ayush Singh</strong>
       </footer>
     </>
   );

@@ -1,24 +1,24 @@
-import React, { createContext, useEffect, useState, useContext } from "react";
+// src/context/NavContext.js
+import React, { createContext, useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
+import { useContext } from "react";
 import { ThemeContext } from "./ThemeContext";
 
-// Create contexts
-export const NavbarContext = createContext();
-export const NavbarColorContext = createContext();
+// Provide two contexts: one for nav open state, one for nav color
+export const NavbarContext = createContext([false, () => {}]);
+export const NavbarColorContext = createContext(["#FFFFFF", () => {}]);
 
 const NavContext = ({ children }) => {
   const [navOpen, setNavOpen] = useState(false);
-  const [navColor, setNavColor] = useState("#FFFFFF"); // default white
+  const [navColor, setNavColor] = useState("#FFFFFF");
   const location = useLocation();
   const { theme } = useContext(ThemeContext);
 
   useEffect(() => {
-    // Define subtle color palette for light/dark theme
+    // Subtle color palette for navbar background (uses CSS variables recommended in app)
     const colors = {
-      darkTheme: "#1A1A1A", // dark navbar for dark mode
-      lightTheme: "#FFFFFF", // light navbar for light mode
-      textDark: "#F8F8F8", // text in dark mode
-      textLight: "#1F2937", // text in light mode
+      darkTheme: "rgba(10,11,12,0.88)", // slightly transparent dark
+      lightTheme: "rgba(255,255,255,0.92)", // slightly transparent light
     };
 
     setNavColor(theme === "dark" ? colors.darkTheme : colors.lightTheme);
