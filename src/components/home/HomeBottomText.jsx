@@ -1,4 +1,10 @@
-import React, { useEffect, useRef, useContext, useMemo } from "react";
+import React, {
+  useEffect,
+  useRef,
+  useContext,
+  useMemo,
+  useCallback,
+} from "react";
 import { Link } from "react-router-dom";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
@@ -6,82 +12,124 @@ import { ThemeContext } from "../../context/ThemeContext";
 
 gsap.registerPlugin(ScrollTrigger);
 
+/* -------------------------------------------------------------------------- */
+/* CONFIG                                                                      */
+/* -------------------------------------------------------------------------- */
+
+const CTA_BUTTONS = [
+  { label: "View Resume", path: "/resume", variant: "outline" },
+  { label: "Hire Me", path: "/contact", variant: "solid" },
+];
+
 const HomeBottomText = () => {
   const sectionRef = useRef(null);
   const buttonsRef = useRef([]);
   const { theme } = useContext(ThemeContext);
-  const isDark = theme === "dark";
 
-  const isTouch =
+  const isDark = theme === "dark";
+  const isTouchDevice =
     typeof window !== "undefined" &&
     window.matchMedia("(pointer: coarse)").matches;
 
-  /* ---------------- COLORS ---------------- */
-  const colors = useMemo(() => {
-    if (isDark) {
-      return {
-        bg: "linear-gradient(135deg,#0b0b0b,#111827)",
-        border: "#1f2937",
-        text: "#d1d5db",
-        primary: "#f59e0b",
-        secondary: "#fbbf24",
-        ripple: "rgba(245,158,11,.25)",
-        footer: "#9ca3af",
-      };
-    }
-    return {
-      bg: "linear-gradient(135deg,#f8fafc,#eef2ff)",
-      border: "#cbd5e1",
-      text: "#1f2937",
-      primary: "#2563eb",
-      secondary: "#3b82f6",
-      ripple: "rgba(37,99,235,.25)",
-      footer: "#64748b",
-    };
-  }, [isDark]);
+  /* -------------------------------------------------------------------------- */
+  /* THEME TOKENS                                                               */
+  /* -------------------------------------------------------------------------- */
 
-  /* ---------------- SCROLL ANIMATION ---------------- */
+  const colors = useMemo(
+    () =>
+      isDark
+        ? {
+            bg: "linear-gradient(135deg,#020617,#111827)",
+            border: "#1f2937",
+            text: "#e5e7eb",
+            primary: "#f59e0b",
+            secondary: "#fbbf24",
+            ripple: "rgba(245,158,11,.25)",
+            footer: "#9ca3af",
+          }
+        : {
+            bg: "linear-gradient(135deg,#f8fafc,#eef2ff)",
+            border: "#cbd5e1",
+            text: "#1f2937",
+            primary: "#2563eb",
+            secondary: "#3b82f6",
+            ripple: "rgba(37,99,235,.25)",
+            footer: "#64748b",
+          },
+    [isDark]
+  );
+
+  /* -------------------------------------------------------------------------- */
+  /* SCROLL REVEAL ANIMATION                                                     */
+  /* -------------------------------------------------------------------------- */
+
   useEffect(() => {
     const ctx = gsap.context(() => {
-      gsap.from(".bottom-reveal", {
-        y: 40,
-        opacity: 0,
-        stagger: 0.2,
-        duration: 1,
-        ease: "power3.out",
+      const tl = gsap.timeline({
         scrollTrigger: {
           trigger: sectionRef.current,
-          start: "top 80%",
+          start: "top 75%",
         },
       });
+
+      tl.from(".reveal-text", {
+        y: 40,
+        opacity: 0,
+        duration: 1,
+        ease: "power3.out",
+      })
+        .from(
+          ".reveal-btn",
+          {
+            y: 30,
+            opacity: 0,
+            stagger: 0.2,
+            duration: 0.8,
+            ease: "power3.out",
+          },
+          "-=0.4"
+        )
+        .from(
+          ".reveal-footer",
+          {
+            y: 20,
+            opacity: 0,
+            duration: 0.6,
+          },
+          "-=0.3"
+        );
     }, sectionRef);
+
     return () => ctx.revert();
   }, []);
 
-  /* ---------------- PROFESSIONAL MAGNETIC EFFECT ---------------- */
+  /* -------------------------------------------------------------------------- */
+  /* MAGNETIC BUTTON EFFECT (DESKTOP ONLY)                                       */
+  /* -------------------------------------------------------------------------- */
+
   useEffect(() => {
-    if (isTouch) return; // 🚫 disable on mobile
+    if (isTouchDevice) return;
 
-    buttonsRef.current.forEach((btn) => {
-      if (!btn) return;
+    buttonsRef.current.forEach((button) => {
+      if (!button) return;
 
-      const content = btn.querySelector(".btn-content");
+      const inner = button.querySelector(".btn-inner");
 
-      const move = (e) => {
-        const rect = btn.getBoundingClientRect();
-        const relX = e.clientX - rect.left - rect.width / 2;
-        const relY = e.clientY - rect.top - rect.height / 2;
+      const handleMove = (e) => {
+        const rect = button.getBoundingClientRect();
+        const x = e.clientX - rect.left - rect.width / 2;
+        const y = e.clientY - rect.top - rect.height / 2;
 
-        gsap.to(content, {
-          x: relX * 0.35, // ✔ strong but controlled
-          y: relY * 0.35,
-          duration: 0.35,
+        gsap.to(inner, {
+          x: x * 0.35,
+          y: y * 0.35,
+          duration: 0.3,
           ease: "power3.out",
         });
       };
 
-      const reset = () => {
-        gsap.to(content, {
+      const handleLeave = () => {
+        gsap.to(inner, {
           x: 0,
           y: 0,
           duration: 0.6,
@@ -89,96 +137,120 @@ const HomeBottomText = () => {
         });
       };
 
-      btn.addEventListener("mousemove", move);
-      btn.addEventListener("mouseleave", reset);
+      button.addEventListener("mousemove", handleMove);
+      button.addEventListener("mouseleave", handleLeave);
 
       return () => {
-        btn.removeEventListener("mousemove", move);
-        btn.removeEventListener("mouseleave", reset);
+        button.removeEventListener("mousemove", handleMove);
+        button.removeEventListener("mouseleave", handleLeave);
       };
     });
-  }, [isTouch]);
+  }, [isTouchDevice]);
 
-  /* ---------------- RIPPLE (SUBTLE) ---------------- */
-  const ripple = (e) => {
-    if (isTouch) return;
+  /* -------------------------------------------------------------------------- */
+  /* RIPPLE EFFECT                                                              */
+  /* -------------------------------------------------------------------------- */
 
-    const btn = e.currentTarget;
-    const rect = btn.getBoundingClientRect();
-    const span = document.createElement("span");
+  const createRipple = useCallback(
+    (e) => {
+      if (isTouchDevice) return;
 
-    span.style.position = "absolute";
-    span.style.left = `${e.clientX - rect.left}px`;
-    span.style.top = `${e.clientY - rect.top}px`;
-    span.style.width = span.style.height = "20px";
-    span.style.background = colors.ripple;
-    span.style.borderRadius = "999px";
-    span.style.transform = "translate(-50%, -50%)";
-    span.style.pointerEvents = "none";
+      const button = e.currentTarget;
+      const rect = button.getBoundingClientRect();
+      const ripple = document.createElement("span");
 
-    btn.appendChild(span);
+      ripple.style.cssText = `
+        position:absolute;
+        left:${e.clientX - rect.left}px;
+        top:${e.clientY - rect.top}px;
+        width:18px;
+        height:18px;
+        background:${colors.ripple};
+        border-radius:50%;
+        transform:translate(-50%,-50%);
+        pointer-events:none;
+      `;
 
-    gsap.to(span, {
-      scale: 14,
-      opacity: 0,
-      duration: 0.8,
-      ease: "power3.out",
-      onComplete: () => span.remove(),
-    });
-  };
+      button.appendChild(ripple);
+
+      gsap.to(ripple, {
+        scale: 14,
+        opacity: 0,
+        duration: 0.8,
+        ease: "power3.out",
+        onComplete: () => ripple.remove(),
+      });
+    },
+    [colors.ripple, isTouchDevice]
+  );
+
+  /* -------------------------------------------------------------------------- */
+  /* RENDER                                                                     */
+  /* -------------------------------------------------------------------------- */
 
   return (
     <>
       <section
         ref={sectionRef}
-        className="relative px-6 py-24 mt-20 rounded-3xl border shadow-xl overflow-hidden"
+        className="relative mx-auto mt-24 max-w-7xl px-5 sm:px-8 py-16 sm:py-20 rounded-3xl border shadow-xl overflow-hidden"
         style={{ background: colors.bg, borderColor: colors.border }}
       >
+        {/* TEXT */}
         <p
-          className="bottom-reveal text-center max-w-4xl mx-auto text-lg sm:text-xl lg:text-2xl leading-relaxed"
+          className="reveal-text mx-auto max-w-4xl text-center text-base sm:text-lg md:text-xl lg:text-2xl leading-relaxed"
           style={{ color: colors.text }}
         >
           Turning{" "}
-          <span style={{ color: colors.primary, fontWeight: 600 }}>ideas</span>{" "}
+          <span className="font-semibold" style={{ color: colors.primary }}>
+            ideas
+          </span>{" "}
           into{" "}
-          <span style={{ color: colors.secondary, fontWeight: 600 }}>
+          <span className="font-semibold" style={{ color: colors.secondary }}>
             scalable digital solutions
           </span>{" "}
-          with clean, maintainable and performance-driven code.
+          with clean, maintainable, and performance-driven code.
         </p>
 
-        <div className="bottom-reveal mt-14 flex flex-col sm:flex-row gap-8 justify-center">
-          {[
-            { text: "View Resume", link: "/resume", outline: true },
-            { text: "Hire Me", link: "/contact", outline: false },
-          ].map((b, i) => (
+        {/* CTA BUTTONS */}
+        <div className="mt-12 flex flex-col sm:flex-row items-center justify-center gap-5 sm:gap-8">
+          {CTA_BUTTONS.map((btn, index) => (
             <Link
-              key={b.text}
-              ref={(el) => (buttonsRef.current[i] = el)}
-              to={b.link}
-              onClick={ripple}
-              className="relative overflow-hidden h-20 w-60 rounded-full flex items-center justify-center uppercase font-semibold tracking-wide"
+              key={btn.label}
+              ref={(el) => (buttonsRef.current[index] = el)}
+              to={btn.path}
+              onClick={createRipple}
+              aria-label={btn.label}
+              className="reveal-btn relative overflow-hidden h-14 sm:h-16 w-full sm:w-60 max-w-xs rounded-full flex items-center justify-center uppercase font-semibold tracking-wide focus:outline-none focus:ring-2 focus:ring-offset-2"
               style={{
-                border: b.outline ? `2px solid ${colors.primary}` : "none",
-                background: b.outline ? "transparent" : colors.primary,
-                color: b.outline ? colors.primary : "#fff",
+                background:
+                  btn.variant === "solid" ? colors.primary : "transparent",
+                color: btn.variant === "solid" ? "#fff" : colors.primary,
+                border:
+                  btn.variant === "outline"
+                    ? `2px solid ${colors.primary}`
+                    : "none",
               }}
             >
-              <span className="btn-content relative z-10">
-                {b.text}
+              <span className="btn-inner relative z-10">
+                {btn.label}
               </span>
             </Link>
           ))}
         </div>
 
-        <p className="bottom-reveal mt-10 text-center text-sm opacity-80">
-          I usually reply within <strong>24 hours</strong>.  
-          Let’s build something impactful.
+        {/* RESPONSE NOTE */}
+        <p
+          className="reveal-footer mt-10 text-center text-sm opacity-80"
+          style={{ color: colors.text }}
+        >
+          I usually reply within <strong>24 hours</strong>. Let’s build something
+          impactful.
         </p>
       </section>
 
+      {/* FOOTER */}
       <footer
-        className="text-center mt-10 text-sm uppercase"
+        className="reveal-footer mt-10 text-center text-xs sm:text-sm tracking-wide uppercase"
         style={{ color: colors.footer }}
       >
         Crafted with <span className="text-red-500">♥</span> by{" "}
