@@ -10,6 +10,18 @@ import {
 
 gsap.registerPlugin(ScrollTrigger);
 
+const handleDownloadResume = () => {
+    const link = document.createElement("a");
+    link.href = "/Ayush_Resume.pdf";
+    link.download = "Ayush_Singh.pdf";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    setToast({ message: "Secure Download Started", visible: true });
+    setTimeout(() => setToast({ message: "", visible: false }), 3000);
+  };
+
 const Resume = () => {
   const sectionRef = useRef(null);
   const glowRef = useRef(null); 
@@ -137,7 +149,7 @@ const Resume = () => {
           <ContactItem icon={<FaEnvelope />} text="singhayushrs13@gmail.com" href="mailto:singhayushrs13@gmail.com" color={themeColors.accent} />
           <ContactItem icon={<FaLinkedin />} text="LinkedIn Profile" href="https://linkedin.com/in/singhayush1356" color={themeColors.accent} />
           <button 
-            ref={downloadBtnRef}
+            onClick={handleDownloadResume}
             className="flex items-center gap-2 px-6 py-3 rounded-full bg-white text-black font-bold hover:shadow-xl transition-shadow active:scale-95 shadow-lg"
           >
             <FaDownload /> Download CV

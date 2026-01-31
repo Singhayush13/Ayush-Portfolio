@@ -1,282 +1,208 @@
-// src/components/nav/FullScreenNav.jsx
-import React, {
-  useContext,
-  useRef,
-  useEffect,
-  useCallback,
-  useLayoutEffect,
-} from "react";
+import React, { useContext, useRef, useEffect, useCallback, useLayoutEffect } from "react";
 import { NavbarContext } from "../../context/NavContext";
 import { ThemeContext } from "../../context/ThemeContext";
 import { Link } from "react-router-dom";
 import gsap from "gsap";
-
-/**
- * Full-screen navigation overlay
- * - accessible: ESC to close, focus trap, close button labelled
- * - animations useLayoutEffect for smoother startup
- * - body scroll is locked while open
- */
+import { FaGithub, FaLinkedin, FaTwitter, FaEnvelope, FaTimes } from "react-icons/fa";
 
 const menuLinks = [
-  { name: "Home", path: "/" },
-  { name: "Projects", path: "/projects" },
-  { name: "About", path: "/about" },
-  { name: "Resume", path: "/resume" },
-  { name: "Contact", path: "/contact" },
+  { name: "Home", path: "/", tag: "01" },
+  { name: "Projects", path: "/projects", tag: "02" },
+  { name: "About", path: "/about", tag: "03" },
+  { name: "Resume", path: "/resume", tag: "04" },
+  { name: "Contact", path: "/contact", tag: "05" },
 ];
 
 const FullScreenNav = () => {
-  const [navOpen, setNavOpen] = useContext(NavbarContext);
+  // Updated to destructure as an object to match your professional NavContext
+  const { navOpen, setNavOpen } = useContext(NavbarContext);
   const { theme } = useContext(ThemeContext);
   const isDark = theme === "dark";
 
   const navRef = useRef(null);
-  const closeBtnRef = useRef(null);
-  const firstFocusableRef = useRef(null);
-  const lastFocusableRef = useRef(null);
 
-  // Prevent body scroll while nav is open
+  // 1. Body Scroll Lock Logic
   useEffect(() => {
     if (navOpen) {
-      document.documentElement.style.overflow = "hidden";
       document.body.style.overflow = "hidden";
     } else {
-      document.documentElement.style.overflow = "";
       document.body.style.overflow = "";
     }
-    return () => {
-      document.documentElement.style.overflow = "";
-      document.body.style.overflow = "";
-    };
   }, [navOpen]);
 
-  // Accessibility: close on ESC and manage focus trap (simple)
-  useEffect(() => {
-    const handleKey = (e) => {
-      if (!navOpen) return;
-      if (e.key === "Escape") {
-        setNavOpen(false);
-      } else if (e.key === "Tab") {
-        // focus trap: keep focus inside navRef
-        const focusable = navRef.current?.querySelectorAll(
-          'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])'
-        );
-        if (!focusable || focusable.length === 0) return;
-        const first = focusable[0];
-        const last = focusable[focusable.length - 1];
-        if (e.shiftKey) {
-          if (document.activeElement === first) {
-            e.preventDefault();
-            last.focus();
-          }
-        } else {
-          if (document.activeElement === last) {
-            e.preventDefault();
-            first.focus();
-          }
-        }
-      }
-    };
-    window.addEventListener("keydown", handleKey);
-    return () => window.removeEventListener("keydown", handleKey);
-  }, [navOpen, setNavOpen]);
-
-  // GSAP open animation
+  // 2. High-End GSAP Animations
   const openAnim = useCallback(() => {
     if (!navRef.current) return;
     gsap.set(navRef.current, { display: "flex" });
 
-    // Respect reduced motion
-    const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if (prefersReduced) {
-      gsap.set(".stair", { scaleY: 1 });
-      gsap.set(".navlink span", { opacity: 1, y: 0, rotateX: 0 });
-      gsap.set(".menu-gradient", { opacity: isDark ? 0.25 : 0.15 });
-      closeBtnRef.current?.querySelectorAll("span").forEach((s) => gsap.set(s, { scaleX: 1 }));
-      // focus first link
-      const firstLink = navRef.current.querySelector("a");
-      firstLink?.focus();
-      return;
-    }
-
     const tl = gsap.timeline();
-    tl.fromTo(
-      ".stair",
-      { scaleY: 0 },
-      {
-        scaleY: 1,
-        transformOrigin: "top",
-        stagger: 0.07,
-        ease: "power4.inOut",
-        duration: 0.5,
-      }
+    
+    tl.fromTo(".stair-column", 
+      { scaleY: 0 }, 
+      { scaleY: 1, stagger: 0.04, ease: "expo.inOut", duration: 0.8 }
     )
-      .fromTo(
-        ".navlink span",
-        { y: 80, opacity: 0, rotateX: 90 },
-        {
-          y: 0,
-          opacity: 1,
-          rotateX: 0,
-          stagger: 0.06,
-          ease: "back.out(1.4)",
-          duration: 0.6,
-        },
-        "-=0.35"
-      )
-      .fromTo(
-        ".menu-gradient",
-        { opacity: 0 },
-        { opacity: isDark ? 0.25 : 0.15, duration: 1.0, ease: "power2.out" },
-        "-=0.5"
-      );
-
-    const bars = closeBtnRef.current?.querySelectorAll("span");
-    if (bars && bars.length) {
-      gsap.fromTo(bars, { scaleX: 0 }, { scaleX: 1, stagger: 0.08, duration: 0.28, ease: "power3.out" });
-    }
-
-    // focus first link when animation completes
-    tl.call(() => {
-      const firstLink = navRef.current.querySelector("a");
-      firstLink?.focus();
-    });
-  }, [isDark]);
-
-  // GSAP close animation
-  const closeAnim = useCallback(() => {
-    if (!navRef.current) return;
-    const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if (prefersReduced) {
-      gsap.set(".navlink span", { opacity: 0, y: 40 });
-      gsap.set(".stair", { scaleY: 0 });
-      gsap.set(navRef.current, { display: "none" });
-      return;
-    }
-
-    const tl = gsap.timeline();
-    tl.to(".navlink span", {
-      y: 40,
-      opacity: 0,
-      stagger: 0.05,
-      ease: "power2.in",
-      duration: 0.28,
-    })
-      .to(
-        ".stair",
-        {
-          scaleY: 0,
-          transformOrigin: "bottom",
-          stagger: 0.06,
-          ease: "power4.inOut",
-          duration: 0.4,
-        },
-        "-=0.12"
-      )
-      .set(navRef.current, { display: "none" });
+    .fromTo(".menu-meta", 
+      { opacity: 0, y: 15 },
+      { opacity: 1, y: 0, duration: 0.6, ease: "power2.out" },
+      "-=0.3"
+    )
+    .fromTo(".nav-link-item", 
+      { y: 120, rotateX: -70, opacity: 0 },
+      { y: 0, rotateX: 0, opacity: 1, stagger: 0.08, ease: "expo.out", duration: 1 },
+      "-=0.6"
+    )
+    .fromTo(".social-btn", 
+      { y: 20, opacity: 0 },
+      { y: 0, opacity: 1, stagger: 0.05, ease: "power3.out", duration: 0.5 },
+      "-=0.5"
+    );
   }, []);
 
-  // Use layout effect for animation triggers (prevents jank)
+  const closeAnim = useCallback(() => {
+    if (!navRef.current) return;
+    const tl = gsap.timeline({ 
+      onComplete: () => gsap.set(navRef.current, { display: "none" }) 
+    });
+
+    tl.to(".nav-link-item", { y: -60, opacity: 0, rotateX: 45, stagger: 0.02, duration: 0.4, ease: "power2.in" })
+      .to(".stair-column", { scaleY: 0, transformOrigin: "bottom", stagger: 0.03, ease: "expo.inOut", duration: 0.6 }, "-=0.2");
+  }, []);
+
   useLayoutEffect(() => {
     navOpen ? openAnim() : closeAnim();
   }, [navOpen, openAnim, closeAnim]);
 
   return (
-    <nav
-      ref={navRef}
-      className="hidden fixed inset-0 z-50 flex-col w-full h-screen overflow-hidden"
-      aria-hidden={!navOpen}
-      aria-label="Main navigation"
-      style={{
-        color: isDark ? "#ffffff" : "#1f2937",
-      }}
-    >
-      {/* Background */}
-      <div
-        className="absolute inset-0 animate-gradient-slow backdrop-blur-2xl"
-        style={{
-          background: isDark
-            ? "linear-gradient(to bottom right, #101010, #0a0a0a)"
-            : "linear-gradient(to bottom right, #f9fafb, #e6eef9)",
-        }}
-      />
-
-      {/* Animated stripes */}
-      <div className="absolute inset-0 flex h-full w-full" aria-hidden>
-        {Array.from({ length: 5 }).map((_, i) => (
-          <div
-            key={i}
-            className="stair w-1/5 h-full scale-y-0 origin-top backdrop-blur-sm"
-            style={{
-              backgroundColor: isDark ? "rgba(78,158,255,0.05)" : "rgba(78,158,255,0.08)",
-            }}
-          />
-        ))}
-      </div>
-
-      {/* Glow overlay */}
-      <div
-        className="menu-gradient absolute inset-0"
-        style={{
-          background: isDark
-            ? "linear-gradient(to bottom right, rgba(78,158,255,0.2), rgba(59,130,246,0.1))"
-            : "linear-gradient(to bottom right, rgba(59,130,246,0.15), rgba(37,99,235,0.1))",
-          opacity: 0,
-        }}
-        aria-hidden
-      />
-
-      {/* Menu content */}
-      <div className="relative z-10 flex flex-col h-full">
-        {/* Top bar */}
-        <div className="flex justify-between items-center p-6 lg:p-12">
-          <div
-            className="text-2xl lg:text-3xl font-bold tracking-wide"
-            style={{ color: isDark ? "#ffffff" : "#1f2937" }}
-          >
-            Ayush Singh
-          </div>
-          <button
-            ref={closeBtnRef}
-            onClick={() => setNavOpen(false)}
-            aria-label="Close navigation"
-            className="relative w-10 h-10 lg:w-12 lg:h-12 flex items-center justify-center group"
-          >
-            <span
-              className="absolute w-6 h-0.5 rotate-45 origin-center transition-all duration-300"
-              style={{ backgroundColor: isDark ? "#3b82f6" : "#2563eb" }}
+    <>
+      <nav
+        ref={navRef}
+        className="hidden fixed inset-0 z-[2000] flex-col w-full h-screen overflow-hidden main-perspective"
+        aria-hidden={!navOpen}
+      >
+        {/* Modern Glass Columns Background */}
+        <div className="absolute inset-0 flex h-full w-full pointer-events-none" aria-hidden>
+          {Array.from({ length: 5 }).map((_, i) => (
+            <div
+              key={i}
+              className="stair-column w-1/5 h-full origin-top"
+              style={{
+                backgroundColor: isDark 
+                  ? `rgba(8, 8, 8, ${0.92 + i * 0.01})` 
+                  : `rgba(252, 252, 252, ${0.96 + i * 0.01})`,
+                borderRight: isDark ? "1px solid rgba(255,255,255,0.03)" : "1px solid rgba(0,0,0,0.03)"
+              }}
             />
-            <span
-              className="absolute w-6 h-0.5 -rotate-45 origin-center transition-all duration-300"
-              style={{ backgroundColor: isDark ? "#3b82f6" : "#2563eb" }}
-            />
-          </button>
-        </div>
-
-        {/* Menu links */}
-        <div className="flex-1 flex flex-col justify-center items-center gap-10 lg:gap-14">
-          {menuLinks.map((link, i) => (
-            <Link
-              key={link.path}
-              to={link.path}
-              onClick={() => setNavOpen(false)}
-              className="navlink text-4xl lg:text-6xl font-[font2] uppercase tracking-wide relative group focus:outline-none"
-              style={{ color: isDark ? "#ffffff" : "#1f2937" }}
-            >
-              <span className="relative inline-block transition-all duration-300 group-hover:text-blue-500 group-hover:scale-105">
-                {link.name}
-              </span>
-              <span
-                className="absolute left-0 -bottom-2 h-[3px] w-0 rounded-full transition-all duration-300 group-hover:w-full"
-                style={{ backgroundColor: isDark ? "#3b82f6" : "#2563eb" }}
-                aria-hidden
-              />
-            </Link>
           ))}
         </div>
-      </div>
-    </nav>
+
+        {/* Professional Texture Overlay */}
+        <div className="absolute inset-0 opacity-[0.03] pointer-events-none mix-blend-overlay grainy-bg" />
+
+        {/* Content Wrapper */}
+        <div className="relative z-10 flex flex-col h-full px-6 py-8 lg:px-20 lg:py-12">
+          
+          {/* Top Bar */}
+          <div className="flex justify-between items-center menu-meta">
+            <div className={`text-[10px] font-black tracking-[0.4em] uppercase ${isDark ? 'text-white/40' : 'text-black/40'}`}>
+              Directory / 2026
+            </div>
+            <button
+              onClick={() => setNavOpen(false)}
+              className={`w-12 h-12 rounded-full border flex items-center justify-center transition-all duration-500 hover:rotate-90 ${
+                isDark ? 'border-white/10 text-white hover:bg-white hover:text-black' : 'border-black/10 text-black hover:bg-black hover:text-white'
+              }`}
+            >
+              <FaTimes size={18} />
+            </button>
+          </div>
+
+          {/* Main Content Grid */}
+          <div className="flex-1 grid lg:grid-cols-2 items-center w-full">
+            
+            {/* Links Section */}
+            <div className="flex flex-col gap-2 lg:gap-4">
+              {menuLinks.map((link) => (
+                <Link
+                  key={link.path}
+                  to={link.path}
+                  onClick={() => setNavOpen(false)}
+                  className="nav-link-item group flex items-center gap-6 focus:outline-none w-fit"
+                >
+                  <span className="text-xs font-mono text-blue-500 font-bold translate-y-2 opacity-0 group-hover:opacity-100 transition-all duration-300">
+                    ({link.tag})
+                  </span>
+                  <span 
+                    className={`text-5xl md:text-7xl lg:text-9xl font-black tracking-tighter uppercase transition-all duration-700 group-hover:pl-6 ${
+                      isDark ? "text-white group-hover:text-blue-500" : "text-slate-900 group-hover:text-blue-600"
+                    }`}
+                  >
+                    {link.name}
+                  </span>
+                </Link>
+              ))}
+            </div>
+
+            {/* Visual Balance Panel (Desktop Only) */}
+            <div className="hidden lg:flex flex-col items-end justify-center h-full gap-16 menu-meta">
+              <div className="space-y-4 text-right">
+                <span className={`text-[10px] font-bold tracking-[0.3em] uppercase opacity-40 ${isDark ? 'text-white' : 'text-black'}`}>Collaborate</span>
+                <h4 className={`text-3xl font-bold ${isDark ? 'text-white' : 'text-slate-900'}`}>hello@ayush.dev</h4>
+              </div>
+
+              <div className="flex flex-wrap justify-end gap-4 max-w-xs">
+                {[
+                  { Icon: FaGithub, label: "Github" },
+                  { Icon: FaLinkedin, label: "LinkedIn" },
+                  { Icon: FaTwitter, label: "Twitter" },
+                  { Icon: FaEnvelope, label: "Mail" }
+                ].map((item, idx) => (
+                  <button key={idx} className={`social-btn px-6 py-3 rounded-xl border flex items-center gap-3 transition-all duration-300 hover:-translate-y-1 ${
+                    isDark ? 'border-white/10 text-white hover:bg-white/5' : 'border-black/10 text-black hover:bg-black/5'
+                  }`}>
+                    <item.Icon size={16} />
+                    <span className="text-[10px] font-bold uppercase tracking-widest">{item.label}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Bottom Footer */}
+          <div className="flex justify-between items-end menu-meta pt-8 border-t border-current opacity-20">
+             <div className="text-[9px] font-bold uppercase tracking-[0.2em]">Based in India</div>
+             <div className="text-[9px] font-bold uppercase tracking-[0.2em]">Ayush Singh Portfolio © 2026</div>
+          </div>
+        </div>
+      </nav>
+
+      <style jsx>{`
+        .main-perspective {
+          perspective: 2000px;
+        }
+
+        .nav-link-item {
+          transform-style: preserve-3d;
+          backface-visibility: hidden;
+        }
+
+        .grainy-bg {
+          background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+        }
+
+        @media (max-width: 768px) {
+          .nav-link-item span:last-child {
+            font-size: 3rem;
+            line-height: 1;
+          }
+        }
+
+        .nav-link-item:focus-visible {
+           outline: 2px solid #3b82f6;
+           outline-offset: 8px;
+           border-radius: 4px;
+        }
+      `}</style>
+    </>
   );
 };
 
