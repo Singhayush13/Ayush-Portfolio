@@ -1,10 +1,11 @@
-import { createContext, useState, useEffect } from "react";
+import { createContext, useRef, useState, useEffect } from "react";
 import { gsap } from "gsap";
 
 export const ThemeContext = createContext();
 
 const ThemeProvider = ({ children }) => {
   const [theme, setTheme] = useState("dark"); // default dark
+  const transitionTimeoutRef = useRef(null);
 
   // Load theme from localStorage
   useEffect(() => {
@@ -17,11 +18,12 @@ const ThemeProvider = ({ children }) => {
     const html = document.documentElement;
 
     // Animate transition
+    gsap.killTweensOf("body");
     gsap.to("body", {
       backgroundColor: theme === "dark" ? "#101010" : "#f9fafb",
       color: theme === "dark" ? "#cfcfcf" : "#1f2937",
-      duration: 0.8,
-      ease: "power2.inOut",
+      duration: 0.45,
+      ease: "none",
     });
 
     if (theme === "dark") {
@@ -37,16 +39,14 @@ const ThemeProvider = ({ children }) => {
 
   // Toggle theme with page fade animation
   const toggleTheme = () => {
-    // Optional: Fade out current content
-    gsap.to("body", {
-      opacity: 0,
-      duration: 0.25,
-      onComplete: () => {
-        setTheme(theme === "dark" ? "light" : "dark");
-        // Fade back in
-        gsap.to("body", { opacity: 1, duration: 0.25 });
-      },
-    });
+    gsap.killTweensOf("body");
+    document.documentElement.classList.add("theme-transitioning");
+    setTheme(theme === "dark" ? "light" : "dark");
+
+    if (transitionTimeoutRef.current) clearTimeout(transitionTimeoutRef.current);
+    transitionTimeoutRef.current = setTimeout(() => {
+      document.documentElement.classList.remove("theme-transitioning");
+    }, 450);
   };
 
   return (

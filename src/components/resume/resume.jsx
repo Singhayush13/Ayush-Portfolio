@@ -3,36 +3,29 @@ import React, { useEffect, useRef, useContext, useState, useMemo, memo } from "r
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { ThemeContext } from "../../context/ThemeContext";
-import { 
-  FaPhoneAlt, FaEnvelope, FaLinkedin, FaChevronDown, 
-  FaChevronUp, FaDownload, FaCode, FaDatabase, FaServer 
+import {
+  FaPhoneAlt, FaEnvelope, FaLinkedin, FaChevronDown,
+  FaChevronUp, FaDownload, FaCode, FaDatabase, FaServer, FaAward
 } from "react-icons/fa";
 
 gsap.registerPlugin(ScrollTrigger);
 
-const handleDownloadResume = () => {
+const Resume = () => {
+  const sectionRef = useRef(null);
+  const downloadBtnRef = useRef(null);
+  const { theme } = useContext(ThemeContext);
+  const isDark = theme === "dark";
+
+  const [expandedSection, setExpandedSection] = useState({ travelex: false, digital: false });
+
+  const handleDownloadResume = () => {
     const link = document.createElement("a");
     link.href = "/Ayush_Resume.pdf";
     link.download = "Ayush_Singh.pdf";
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-
-    setToast({ message: "Secure Download Started", visible: true });
-    setTimeout(() => setToast({ message: "", visible: false }), 3000);
   };
-
-const Resume = () => {
-  const sectionRef = useRef(null);
-  const glowRef = useRef(null); 
-  const downloadBtnRef = useRef(null); 
-  const { theme } = useContext(ThemeContext);
-  const isDark = theme === "dark";
-
-  const [expandedSection, setExpandedSection] = useState({ digital: false, aakaar: false });
-
-  // Detect touch device
-  const isTouchDevice = typeof window !== 'undefined' && ('ontouchstart' in window || navigator.maxTouchPoints > 0);
 
   const themeColors = useMemo(() => ({
     bg: isDark ? "#08080a" : "#f8fafc",
@@ -44,29 +37,9 @@ const Resume = () => {
   }), [isDark]);
 
   useEffect(() => {
+    const buttonListeners = [];
     let ctx = gsap.context(() => {
-      // 1. CUSTOM CURSOR TRACKING
-      if (!isTouchDevice && glowRef.current) {
-        const moveCursor = (e) => {
-          // Use quickSetter for better performance on high-refresh monitors
-          gsap.to(glowRef.current, {
-            x: e.clientX,
-            y: e.clientY,
-            duration: 0.5,
-            ease: "power3.out"
-          });
-        };
-        window.addEventListener("mousemove", moveCursor);
-
-        // Hover Effect for interactive elements
-        const interactives = document.querySelectorAll('.glass-card, button, a');
-        interactives.forEach(el => {
-          el.addEventListener('mouseenter', () => gsap.to(glowRef.current, { scale: 1.8, opacity: 0.8 }));
-          el.addEventListener('mouseleave', () => gsap.to(glowRef.current, { scale: 1, opacity: 1 }));
-        });
-      }
-
-      // 2. MAGNETIC BUTTON
+      // 1. MAGNETIC BUTTON
       if (downloadBtnRef.current) {
         const btn = downloadBtnRef.current;
         const moveBtn = (e) => {
@@ -76,12 +49,13 @@ const Resume = () => {
           gsap.to(btn, { x: x * 0.3, y: y * 0.3, duration: 0.4 });
         };
         const resetBtn = () => gsap.to(btn, { x: 0, y: 0, duration: 0.7, ease: "elastic.out(1, 0.3)" });
-        
+
         btn.addEventListener("mousemove", moveBtn);
         btn.addEventListener("mouseleave", resetBtn);
+        buttonListeners.push({ btn, moveBtn, resetBtn });
       }
 
-      // 3. REVEAL ANIMATIONS
+      // 2. REVEAL ANIMATIONS
       gsap.from(".resume-header", { y: 60, opacity: 0, duration: 1, ease: "power4.out" });
 
       gsap.utils.toArray(".resume-section").forEach((el) => {
@@ -98,38 +72,33 @@ const Resume = () => {
       });
     }, sectionRef);
 
-    return () => ctx.revert();
-  }, [isTouchDevice]);
+    return () => {
+      ctx.revert();
+      buttonListeners.forEach(({ btn, moveBtn, resetBtn }) => {
+        btn.removeEventListener("mousemove", moveBtn);
+        btn.removeEventListener("mouseleave", resetBtn);
+      });
+    };
+  }, []);
 
   return (
     <main
       ref={sectionRef}
       className="relative min-h-screen w-full px-4 sm:px-8 lg:px-32 py-20 overflow-hidden"
-      style={{ 
-        backgroundColor: themeColors.bg, 
+      style={{
+        backgroundColor: themeColors.bg,
         color: themeColors.text,
-        cursor: isTouchDevice ? "auto" : "none" 
+        cursor: "auto"
       }}
     >
-      {/* 1. CUSTOM CURSOR */}
-      {!isTouchDevice && (
-        <div 
-          ref={glowRef} 
-          className="fixed top-0 left-0 w-24 h-24 -translate-x-1/2 -translate-y-1/2 pointer-events-none z-[9999] rounded-full border border-white/20 backdrop-invert-[0.1] flex items-center justify-center"
-        >
-          <div className="w-1.5 h-1.5 bg-white rounded-full opacity-50" />
-          <div className="absolute inset-0 w-full h-full bg-white/5 blur-xl rounded-full" />
-        </div>
-      )}
-
       {/* 2. BACKGROUND BLOBS */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden">
         <div className="absolute inset-0 opacity-[0.03] mix-blend-overlay"
-             style={{ backgroundImage: `url("https://grainy-gradients.vercel.app/noise.svg")` }} />
-        <div className="glow-blob absolute top-[-10%] right-[-5%] w-[40vw] h-[40vw] rounded-full blur-[120px] opacity-20" 
-             style={{ background: themeColors.accent }} />
-        <div className="glow-blob absolute bottom-[-10%] left-[-5%] w-[35vw] h-[35vw] rounded-full blur-[120px] opacity-10" 
-             style={{ background: themeColors.secondary }} />
+          style={{ backgroundImage: `url("https://grainy-gradients.vercel.app/noise.svg")` }} />
+        <div className="glow-blob absolute top-[-10%] right-[-5%] w-[40vw] h-[40vw] rounded-full blur-[120px] opacity-20"
+          style={{ background: themeColors.accent }} />
+        <div className="glow-blob absolute bottom-[-10%] left-[-5%] w-[35vw] h-[35vw] rounded-full blur-[120px] opacity-10"
+          style={{ background: themeColors.secondary }} />
       </div>
 
       {/* HEADER */}
@@ -140,7 +109,7 @@ const Resume = () => {
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-amber-500"> Singh </span>
           </h1>
           <p className="mt-4 text-lg font-medium tracking-widest uppercase opacity-60">
-            Software Developer & System Architect
+            Software Engineer | Backend & Cloud
           </p>
         </div>
 
@@ -148,7 +117,7 @@ const Resume = () => {
           <ContactItem icon={<FaPhoneAlt />} text="+91 9096959656" href="tel:+919096959656" color={themeColors.accent} />
           <ContactItem icon={<FaEnvelope />} text="singhayushrs13@gmail.com" href="mailto:singhayushrs13@gmail.com" color={themeColors.accent} />
           <ContactItem icon={<FaLinkedin />} text="LinkedIn Profile" href="https://linkedin.com/in/singhayush1356" color={themeColors.accent} />
-          <button 
+          <button
             onClick={handleDownloadResume}
             className="flex items-center gap-2 px-6 py-3 rounded-full bg-white text-black font-bold hover:shadow-xl transition-shadow active:scale-95 shadow-lg"
           >
@@ -160,51 +129,54 @@ const Resume = () => {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 relative z-10">
         <div className="lg:col-span-8 space-y-8">
           <section className="resume-section glass-card p-8 rounded-3xl border shadow-2xl transition-all duration-500"
-                   style={{ backgroundColor: themeColors.card, borderColor: themeColors.border }}>
+            style={{ backgroundColor: themeColors.card, borderColor: themeColors.border }}>
             <SectionHeader title="About Me" icon={<FaCode />} color={themeColors.accent} />
             <p className="text-lg leading-relaxed opacity-80">
-              Results-driven Software Developer skilled in React.js, Node.js, and .NET ecosystems. 
-              I specialize in bridging the gap between legacy systems (Classic ASP) and modern 
-              web architectures to deliver high-performance, scalable solutions.
+              Driven Software Engineer with hands-on experience in backend development, serverless architectures, and ETL data pipelines.
+              Proficient in TypeScript, Node.js, AWS Lambda, Amazon SQS, DynamoDB, and relational and non-relational databases.
+              I build reliable systems, real-time applications, and high-performance web experiences.
             </p>
           </section>
 
           <section className="resume-section glass-card p-8 rounded-3xl border shadow-2xl transition-all duration-500"
-                   style={{ backgroundColor: themeColors.card, borderColor: themeColors.border }}>
+            style={{ backgroundColor: themeColors.card, borderColor: themeColors.border }}>
             <SectionHeader title="Experience" icon={<FaServer />} color={themeColors.accent} />
             <div className="space-y-12 mt-8">
-              <TimelineItem 
-                title="Software Developer" company="Digital ASPL" date="May 2025 – Present"
+              <TimelineItem
+                title="Trainee Software Engineer" company="Travelex" date="Feb 2026 – Present"
+                isExpanded={expandedSection.travelex}
+                toggle={() => setExpandedSection(p => ({ ...p, travelex: !p.travelex }))}
+                color={themeColors.accent}
+              >
+                <li>Architecting and maintaining robust ETL jobs for enterprise data processing pipelines and system integration frameworks.</li>
+                <li>Developing scalable backend services and event-driven serverless microservices with Node.js and TypeScript.</li>
+                <li>Optimizing asynchronous message-queue processing with AWS Lambda, Amazon SQS, and DynamoDB.</li>
+                <li>Configuring Grafana monitoring, structured logs, and system health alerts to maximize uptime.</li>
+              </TimelineItem>
+
+              <TimelineItem
+                title="Software Developer" company="Digital ASPL" date="May 2025 – Nov 2025"
                 isExpanded={expandedSection.digital}
                 toggle={() => setExpandedSection(p => ({ ...p, digital: !p.digital }))}
                 color={themeColors.accent}
               >
-                <li>Modernized Classic ASP/VBScript modules into optimized .NET workflows.</li>
-                <li>Architected SQL Server schemas with advanced stored procedures for 40% faster query execution.</li>
-                <li>Implemented end-to-end payment reconciliation systems with automated edge-case handling.</li>
+                <li>Developed and maintained enterprise web software using Classic ASP, VBScript, and SQL Server.</li>
+                <li>Engineered performant backend business logic, secure form processing, and comprehensive data validation.</li>
+                <li>Refactored complex legacy database queries to reduce latency and improve application stability.</li>
               </TimelineItem>
 
-              <TimelineItem 
-                title="Admin Executive" company="Aakaar Education" date="Jun 2023 – May 2025"
-                isExpanded={expandedSection.aakaar}
-                toggle={() => setExpandedSection(p => ({ ...p, aakaar: !p.aakaar }))}
-                color={themeColors.accent}
-              >
-                <li>Automated student management reporting using SQL and Excel scripting.</li>
-                <li>Optimized outreach programs using data-driven admission tracking.</li>
-              </TimelineItem>
             </div>
           </section>
         </div>
 
         <div className="lg:col-span-4 space-y-8">
           <section className="resume-section glass-card p-8 rounded-3xl border shadow-2xl transition-all duration-500"
-                   style={{ backgroundColor: themeColors.card, borderColor: themeColors.border }}>
+            style={{ backgroundColor: themeColors.card, borderColor: themeColors.border }}>
             <SectionHeader title="Tech Stack" icon={<FaDatabase />} color={themeColors.accent} />
             <div className="flex flex-wrap gap-2 mt-6">
-              {["React", "Node", "MongoDB", "SQL Server", "ASP.NET", "GSAP", "Socket.IO", "REST API"].map(skill => (
+              {["JavaScript", "TypeScript", "Node.js", "AWS Lambda", "Amazon SQS", "DynamoDB", "MongoDB", "SQL Server", "React.js", "Grafana", "Git", "REST APIs"].map(skill => (
                 <span key={skill} className="px-3 py-1.5 rounded-xl border text-xs font-bold uppercase tracking-tight transition-all hover:bg-white/10"
-                      style={{ borderColor: themeColors.border, background: isDark ? "rgba(255,255,255,0.05)" : "white" }}>
+                  style={{ borderColor: themeColors.border, background: isDark ? "rgba(255,255,255,0.05)" : "white" }}>
                   {skill}
                 </span>
               ))}
@@ -212,18 +184,30 @@ const Resume = () => {
           </section>
 
           <section className="resume-section glass-card p-8 rounded-3xl border shadow-2xl transition-all duration-500"
-                   style={{ backgroundColor: themeColors.card, borderColor: themeColors.border }}>
+            style={{ backgroundColor: themeColors.card, borderColor: themeColors.border }}>
             <h3 className="text-xl font-bold mb-6">Education</h3>
             <div className="space-y-6">
               <div>
-                <h4 className="font-bold text-sm">B.Sc IT (Sem 4)</h4>
-                <p className="text-xs opacity-60">Thakur Ramnarayan College • 8.40 CGPA</p>
+                <h4 className="font-bold text-sm">Bachelor of Science in Information Technology</h4>
+                <p className="text-xs opacity-60">Thakur Ramnarayan College of Arts & Commerce • 2023 – 2026</p>
+                <p className="text-xs opacity-60">CGPA: 8.72/10</p>
               </div>
               <div className="pt-4 border-t" style={{ borderColor: themeColors.border }}>
-                <h4 className="font-bold text-sm">XII Science (CS)</h4>
-                <p className="text-xs opacity-60">St. Anne’s Jr. College</p>
+                <h4 className="font-bold text-sm">Higher Secondary Education (Science)</h4>
+                <p className="text-xs opacity-60">St. Anne’s Junior College • 2021 – 2023</p>
+                <p className="text-xs opacity-60">HSC: 56.7% • Computer Science</p>
               </div>
             </div>
+          </section>
+
+          <section className="resume-section glass-card p-8 rounded-3xl border shadow-2xl transition-all duration-500"
+            style={{ backgroundColor: themeColors.card, borderColor: themeColors.border }}>
+            <SectionHeader title="Certifications" icon={<FaAward />} color={themeColors.accent} />
+            <ul className="space-y-3 text-sm opacity-80">
+              <li>AWS Serverless Lambda Functions — Udemy, March 2026</li>
+              <li>JavaScript Certificate of Excellence — Programming Hub, 2024</li>
+              <li>Technical hackathon participant and DSO-level cricket player</li>
+            </ul>
           </section>
         </div>
       </div>

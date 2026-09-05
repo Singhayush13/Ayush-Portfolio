@@ -6,21 +6,23 @@ import Navbar from "./components/Navigation/Navbar";
 import FullScreenNav from "./components/Navigation/FullScreenNav";
 import Contact from "./pages/Contact";
 import Resume from "./components/resume/resume";
+import GlobalCursor from "./components/ui/GlobalCursor";
 
 const App = () => {
   return (
     <div className="overflow-x-hidden">
       <Navbar />
       <FullScreenNav />
+      <GlobalCursor />
 
       {/* ✅ Wrap all routes in Stairs for global page transition */}
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/about" element={<About />} />
-          <Route path="/contact" element={<Contact />} />
-          <Route path="/projects" element={<Projects />} />
-          <Route path="/resume" element={<Resume />} />
-        </Routes>
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/about" element={<About />} />
+        <Route path="/contact" element={<Contact />} />
+        <Route path="/projects" element={<Projects />} />
+        <Route path="/resume" element={<Resume />} />
+      </Routes>
     </div>
   );
 };

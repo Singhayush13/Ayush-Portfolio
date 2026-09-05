@@ -3,7 +3,7 @@ import { NavbarContext } from "../../context/NavContext";
 import { ThemeContext } from "../../context/ThemeContext";
 import { Link } from "react-router-dom";
 import gsap from "gsap";
-import { FaGithub, FaLinkedin, FaTwitter, FaEnvelope, FaTimes } from "react-icons/fa";
+import { FaGithub, FaLinkedin, FaEnvelope, FaTimes } from "react-icons/fa";
 
 const menuLinks = [
   { name: "Home", path: "/", tag: "01" },
@@ -28,44 +28,50 @@ const FullScreenNav = () => {
     } else {
       document.body.style.overflow = "";
     }
+
+    return () => {
+      document.body.style.overflow = "";
+    };
   }, [navOpen]);
 
   // 2. High-End GSAP Animations
   const openAnim = useCallback(() => {
     if (!navRef.current) return;
+    const nav = navRef.current;
     gsap.set(navRef.current, { display: "flex" });
 
     const tl = gsap.timeline();
-    
-    tl.fromTo(".stair-column", 
-      { scaleY: 0 }, 
+
+    tl.fromTo(nav.querySelectorAll(".stair-column"),
+      { scaleY: 0 },
       { scaleY: 1, stagger: 0.04, ease: "expo.inOut", duration: 0.8 }
     )
-    .fromTo(".menu-meta", 
-      { opacity: 0, y: 15 },
-      { opacity: 1, y: 0, duration: 0.6, ease: "power2.out" },
-      "-=0.3"
-    )
-    .fromTo(".nav-link-item", 
-      { y: 120, rotateX: -70, opacity: 0 },
-      { y: 0, rotateX: 0, opacity: 1, stagger: 0.08, ease: "expo.out", duration: 1 },
-      "-=0.6"
-    )
-    .fromTo(".social-btn", 
-      { y: 20, opacity: 0 },
-      { y: 0, opacity: 1, stagger: 0.05, ease: "power3.out", duration: 0.5 },
-      "-=0.5"
-    );
+      .fromTo(nav.querySelectorAll(".menu-meta"),
+        { opacity: 0, y: 15 },
+        { opacity: 1, y: 0, duration: 0.6, ease: "power2.out" },
+        "-=0.3"
+      )
+      .fromTo(nav.querySelectorAll(".nav-link-item"),
+        { y: 120, rotateX: -70, opacity: 0 },
+        { y: 0, rotateX: 0, opacity: 1, stagger: 0.08, ease: "expo.out", duration: 1 },
+        "-=0.6"
+      )
+      .fromTo(nav.querySelectorAll(".social-btn"),
+        { y: 20, opacity: 0 },
+        { y: 0, opacity: 1, stagger: 0.05, ease: "power3.out", duration: 0.5 },
+        "-=0.5"
+      );
   }, []);
 
   const closeAnim = useCallback(() => {
     if (!navRef.current) return;
-    const tl = gsap.timeline({ 
-      onComplete: () => gsap.set(navRef.current, { display: "none" }) 
+    const nav = navRef.current;
+    const tl = gsap.timeline({
+      onComplete: () => gsap.set(navRef.current, { display: "none" })
     });
 
-    tl.to(".nav-link-item", { y: -60, opacity: 0, rotateX: 45, stagger: 0.02, duration: 0.4, ease: "power2.in" })
-      .to(".stair-column", { scaleY: 0, transformOrigin: "bottom", stagger: 0.03, ease: "expo.inOut", duration: 0.6 }, "-=0.2");
+    tl.to(nav.querySelectorAll(".nav-link-item"), { y: -60, opacity: 0, rotateX: 45, stagger: 0.02, duration: 0.4, ease: "power2.in" })
+      .to(nav.querySelectorAll(".stair-column"), { scaleY: 0, transformOrigin: "bottom", stagger: 0.03, ease: "expo.inOut", duration: 0.6 }, "-=0.2");
   }, []);
 
   useLayoutEffect(() => {
@@ -86,8 +92,8 @@ const FullScreenNav = () => {
               key={i}
               className="stair-column w-1/5 h-full origin-top"
               style={{
-                backgroundColor: isDark 
-                  ? `rgba(8, 8, 8, ${0.92 + i * 0.01})` 
+                backgroundColor: isDark
+                  ? `rgba(8, 8, 8, ${0.92 + i * 0.01})`
                   : `rgba(252, 252, 252, ${0.96 + i * 0.01})`,
                 borderRight: isDark ? "1px solid rgba(255,255,255,0.03)" : "1px solid rgba(0,0,0,0.03)"
               }}
@@ -100,7 +106,7 @@ const FullScreenNav = () => {
 
         {/* Content Wrapper */}
         <div className="relative z-10 flex flex-col h-full px-6 py-8 lg:px-20 lg:py-12">
-          
+
           {/* Top Bar */}
           <div className="flex justify-between items-center menu-meta">
             <div className={`text-[10px] font-black tracking-[0.4em] uppercase ${isDark ? 'text-white/40' : 'text-black/40'}`}>
@@ -108,9 +114,8 @@ const FullScreenNav = () => {
             </div>
             <button
               onClick={() => setNavOpen(false)}
-              className={`w-12 h-12 rounded-full border flex items-center justify-center transition-all duration-500 hover:rotate-90 ${
-                isDark ? 'border-white/10 text-white hover:bg-white hover:text-black' : 'border-black/10 text-black hover:bg-black hover:text-white'
-              }`}
+              className={`w-12 h-12 rounded-full border flex items-center justify-center transition-all duration-500 hover:rotate-90 ${isDark ? 'border-white/10 text-white hover:bg-white hover:text-black' : 'border-black/10 text-black hover:bg-black hover:text-white'
+                }`}
             >
               <FaTimes size={18} />
             </button>
@@ -118,7 +123,7 @@ const FullScreenNav = () => {
 
           {/* Main Content Grid */}
           <div className="flex-1 grid lg:grid-cols-2 items-center w-full">
-            
+
             {/* Links Section */}
             <div className="flex flex-col gap-2 lg:gap-4">
               {menuLinks.map((link) => (
@@ -131,10 +136,9 @@ const FullScreenNav = () => {
                   <span className="text-xs font-mono text-blue-500 font-bold translate-y-2 opacity-0 group-hover:opacity-100 transition-all duration-300">
                     ({link.tag})
                   </span>
-                  <span 
-                    className={`text-5xl md:text-7xl lg:text-9xl font-black tracking-tighter uppercase transition-all duration-700 group-hover:pl-6 ${
-                      isDark ? "text-white group-hover:text-blue-500" : "text-slate-900 group-hover:text-blue-600"
-                    }`}
+                  <span
+                    className={`text-5xl md:text-7xl lg:text-9xl font-black tracking-tighter uppercase transition-all duration-700 group-hover:pl-6 ${isDark ? "text-white group-hover:text-blue-500" : "text-slate-900 group-hover:text-blue-600"
+                      }`}
                   >
                     {link.name}
                   </span>
@@ -146,22 +150,26 @@ const FullScreenNav = () => {
             <div className="hidden lg:flex flex-col items-end justify-center h-full gap-16 menu-meta">
               <div className="space-y-4 text-right">
                 <span className={`text-[10px] font-bold tracking-[0.3em] uppercase opacity-40 ${isDark ? 'text-white' : 'text-black'}`}>Collaborate</span>
-                <h4 className={`text-3xl font-bold ${isDark ? 'text-white' : 'text-slate-900'}`}>hello@ayush.dev</h4>
+                <h4 className={`text-3xl font-bold ${isDark ? 'text-white' : 'text-slate-900'}`}>singhayushrs13@gmail.com</h4>
               </div>
 
               <div className="flex flex-wrap justify-end gap-4 max-w-xs">
                 {[
-                  { Icon: FaGithub, label: "Github" },
-                  { Icon: FaLinkedin, label: "LinkedIn" },
-                  { Icon: FaTwitter, label: "Twitter" },
-                  { Icon: FaEnvelope, label: "Mail" }
+                  { Icon: FaGithub, label: "Github", href: "https://github.com/Singhayush13" },
+                  { Icon: FaLinkedin, label: "LinkedIn", href: "https://linkedin.com/in/singhayush1356" },
+                  { Icon: FaEnvelope, label: "Mail", href: "mailto:singhayushrs13@gmail.com" }
                 ].map((item, idx) => (
-                  <button key={idx} className={`social-btn px-6 py-3 rounded-xl border flex items-center gap-3 transition-all duration-300 hover:-translate-y-1 ${
-                    isDark ? 'border-white/10 text-white hover:bg-white/5' : 'border-black/10 text-black hover:bg-black/5'
-                  }`}>
+                  <a
+                    key={idx}
+                    href={item.href}
+                    target={item.href.startsWith("mailto:") ? undefined : "_blank"}
+                    rel={item.href.startsWith("mailto:") ? undefined : "noopener noreferrer"}
+                    className={`social-btn px-6 py-3 rounded-xl border flex items-center gap-3 transition-all duration-300 hover:-translate-y-1 ${isDark ? 'border-white/10 text-white hover:bg-white/5' : 'border-black/10 text-black hover:bg-black/5'
+                      }`}
+                  >
                     <item.Icon size={16} />
                     <span className="text-[10px] font-bold uppercase tracking-widest">{item.label}</span>
-                  </button>
+                  </a>
                 ))}
               </div>
             </div>
@@ -169,8 +177,8 @@ const FullScreenNav = () => {
 
           {/* Bottom Footer */}
           <div className="flex justify-between items-end menu-meta pt-8 border-t border-current opacity-20">
-             <div className="text-[9px] font-bold uppercase tracking-[0.2em]">Based in India</div>
-             <div className="text-[9px] font-bold uppercase tracking-[0.2em]">Ayush Singh Portfolio © 2026</div>
+            <div className="text-[9px] font-bold uppercase tracking-[0.2em]">Based in India</div>
+            <div className="text-[9px] font-bold uppercase tracking-[0.2em]">Ayush Singh Portfolio © 2026</div>
           </div>
         </div>
       </nav>

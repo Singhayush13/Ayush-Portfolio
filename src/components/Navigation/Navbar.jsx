@@ -1,52 +1,66 @@
-import React, { useContext, useRef, useEffect, useState, useMemo } from "react";
-import { NavbarContext, NavbarColorContext } from "../../context/NavContext";
+import { useContext, useRef, useEffect, useState, useMemo } from "react";
+import { NavbarContext } from "../../context/NavContext";
 import { ThemeContext } from "../../context/ThemeContext";
 import gsap from "gsap";
-import { FaSun, FaMoon, FaDownload } from "react-icons/fa";
+import { FaSun, FaMoon, FaDownload, FaPhoneAlt } from "react-icons/fa";
 
 const Navbar = () => {
   // Updated to destructure from named objects as per your professional NavContext
   const { navOpen, setNavOpen } = useContext(NavbarContext);
-  const { navColor } = useContext(NavbarColorContext);
   const { theme, toggleTheme } = useContext(ThemeContext);
 
   const navRef = useRef(null);
   const burgerRef = useRef(null);
   const innerNavRef = useRef(null);
+  const scrollFrameRef = useRef(null);
+  const lastScrolledRef = useRef(null);
 
   const [toast, setToast] = useState({ message: "", visible: false });
   const isDarkMode = useMemo(() => theme === "dark", [theme]);
 
   // 1. Robust Scroll Interaction & Visibility Fix
   useEffect(() => {
+    const navElement = innerNavRef.current;
     const handleScroll = () => {
-      if (!innerNavRef.current) return;
-      const isScrolled = window.scrollY > 20;
+      if (!navElement) return;
+      if (scrollFrameRef.current) return;
 
-      gsap.to(innerNavRef.current, {
-        padding: isScrolled ? "0.6rem 1.5rem" : "1.2rem 2.5rem",
-        borderRadius: isScrolled ? "100px" : "0px",
-        width: isScrolled ? "92%" : "100%",
-        marginTop: isScrolled ? "15px" : "0px",
-        backgroundColor: isScrolled 
-          ? (isDarkMode ? "rgba(10, 10, 10, 0.8)" : "rgba(255, 255, 255, 0.8)") 
-          : (isDarkMode ? "rgba(5, 5, 5, 1)" : "rgba(248, 250, 252, 1)"),
-        boxShadow: isScrolled 
-          ? "0 10px 30px -10px rgba(0,0,0,0.3)" 
-          : "0 0 0 rgba(0,0,0,0)",
-        duration: 0.5,
-        ease: "expo.out",
+      scrollFrameRef.current = requestAnimationFrame(() => {
+        scrollFrameRef.current = null;
+        const isScrolled = window.scrollY > 20;
+        if (isScrolled === lastScrolledRef.current) return;
+        lastScrolledRef.current = isScrolled;
+
+        gsap.to(navElement, {
+          padding: isScrolled ? "0.6rem 1.5rem" : "1.2rem 2.5rem",
+          borderRadius: isScrolled ? "100px" : "0px",
+          width: isScrolled ? "92%" : "100%",
+          marginTop: isScrolled ? "15px" : "0px",
+          backgroundColor: isScrolled
+            ? (isDarkMode ? "rgba(10, 10, 10, 0.8)" : "rgba(255, 255, 255, 0.8)")
+            : (isDarkMode ? "rgba(5, 5, 5, 1)" : "rgba(248, 250, 252, 1)"),
+          boxShadow: isScrolled
+            ? "0 10px 30px -10px rgba(0,0,0,0.3)"
+            : "0 0 0 rgba(0,0,0,0)",
+          duration: 0.5,
+          ease: "expo.out",
+        });
       });
     };
 
     window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
+    handleScroll();
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+      if (scrollFrameRef.current) cancelAnimationFrame(scrollFrameRef.current);
+      gsap.killTweensOf(navElement);
+    };
   }, [isDarkMode]);
 
   // 2. Fail-Safe Entrance Animation
   useEffect(() => {
     gsap.set(navRef.current, { opacity: 1, visibility: "visible" });
-    gsap.fromTo(navRef.current, 
+    gsap.fromTo(navRef.current,
       { y: -100, opacity: 0 },
       { y: 0, opacity: 1, duration: 1.2, ease: "expo.out", delay: 0.1 }
     );
@@ -71,9 +85,9 @@ const Navbar = () => {
 
   const handleThemeToggle = () => {
     toggleTheme();
-    gsap.fromTo(".theme-icon-container", 
+    gsap.fromTo(".theme-icon-container",
       { rotate: -90, scale: 0.8 },
-      { rotate: 0, scale: 1, duration: 0.6, ease: "elastic.out(1, 0.75)" }
+      { rotate: 0, scale: 1, duration: 0.45, ease: "none" }
     );
   };
 
@@ -132,11 +146,19 @@ const Navbar = () => {
             </button>
 
             <div className="flex items-center gap-3">
-               <button
+              <a
+                href="tel:+919096959656"
+                aria-label="Call Ayush at 9096959656"
+                title="Call 9096959656"
+                className="flex h-9 w-9 items-center justify-center rounded-xl border border-green-500/30 bg-green-600 text-white transition-colors hover:bg-green-700"
+              >
+                <FaPhoneAlt size={15} />
+              </a>
+
+              <button
                 onClick={handleThemeToggle}
-                className={`theme-icon-container p-2 rounded-xl border transition-all duration-300 ${
-                  isDarkMode ? 'bg-white/5 border-white/10 text-yellow-400' : 'bg-black/5 border-black/10 text-blue-600'
-                }`}
+                className={`theme-icon-container p-2 rounded-xl border transition-all duration-300 ${isDarkMode ? 'bg-white/5 border-white/10 text-yellow-400' : 'bg-black/5 border-black/10 text-blue-600'
+                  }`}
               >
                 {isDarkMode ? <FaMoon size={18} /> : <FaSun size={18} />}
               </button>
@@ -157,10 +179,10 @@ const Navbar = () => {
 
       {toast.visible && (
         <div className="fixed top-24 right-6 z-[1000] bg-blue-600 text-white px-6 py-3 rounded-xl shadow-2xl flex items-center gap-3 animate-in fade-in slide-in-from-right-10 duration-500">
-           <div className="bg-white/20 p-1.5 rounded-lg">
-              <FaDownload size={12} />
-           </div>
-           <span className="font-bold text-xs tracking-wider uppercase">{toast.message}</span>
+          <div className="bg-white/20 p-1.5 rounded-lg">
+            <FaDownload size={12} />
+          </div>
+          <span className="font-bold text-xs tracking-wider uppercase">{toast.message}</span>
         </div>
       )}
 

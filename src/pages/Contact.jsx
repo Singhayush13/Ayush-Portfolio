@@ -42,22 +42,26 @@ const Contact = () => {
   const themeColors = isDark ? colors.dark : colors.light;
 
   useEffect(() => {
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    window.scrollTo({ top: 0, behavior: "auto" });
   }, []);
 
   useEffect(() => {
     if (!containerRef.current) return;
 
-    const tl = gsap.timeline();
-    tl.fromTo(".contact-reveal", 
-      { y: 60, opacity: 0 },
-      { y: 0, opacity: 1, duration: 1, stagger: 0.2, ease: "expo.out" }
-    )
-    .fromTo(".input-animate",
-      { x: -20, opacity: 0 },
-      { x: 0, opacity: 1, stagger: 0.1, duration: 0.8, ease: "power3.out" },
-      "-=0.5"
-    );
+    const ctx = gsap.context(() => {
+      const tl = gsap.timeline();
+      tl.fromTo(".contact-reveal",
+        { y: 60, opacity: 0 },
+        { y: 0, opacity: 1, duration: 1, stagger: 0.2, ease: "expo.out" }
+      )
+        .fromTo(".input-animate",
+          { x: -20, opacity: 0 },
+          { x: 0, opacity: 1, stagger: 0.1, duration: 0.8, ease: "power3.out" },
+          "-=0.5"
+        );
+    }, containerRef);
+
+    return () => ctx.revert();
   }, []);
 
   const showToast = (message, type = "success") => {
@@ -85,13 +89,13 @@ const Contact = () => {
       formRef.current,
       "UoAD20IR5Ag4lhXet"
     )
-    .then(() => {
-      formRef.current.reset();
-      showToast("Message Sent Successfully!", "success");
-    }, (error) => {
-      console.error(error.text);
-      showToast("Failed to Send Message!", "error");
-    });
+      .then(() => {
+        formRef.current.reset();
+        showToast("Message Sent Successfully!", "success");
+      }, (error) => {
+        console.error(error.text);
+        showToast("Failed to Send Message!", "error");
+      });
   }, []);
 
   return (
@@ -112,7 +116,7 @@ const Contact = () => {
         </div>
 
         <div className="relative z-10 w-full max-w-6xl grid lg:grid-cols-2 gap-16 items-center">
-          
+
           {/* Left Column: Content */}
           <div className="space-y-10">
             <div className="contact-reveal">
@@ -130,14 +134,14 @@ const Contact = () => {
                 <span className="text-[10px] font-black uppercase tracking-widest opacity-40 block mb-1">Email Me</span>
                 <a href="mailto:singhayushrs13@gmail.com" className="text-2xl font-bold hover:text-blue-500 transition-colors duration-300">singhayushrs13@gmail.com</a>
               </div>
-              
+
               <div ref={socialRef} className="flex gap-6">
                 {[
                   { href: "https://www.instagram.com/singhayush13", icon: <FaInstagram />, label: "Instagram" },
                   { href: "https://www.linkedin.com/in/singhayush1356", icon: <FaLinkedin />, label: "LinkedIn" }
                 ].map((s) => (
-                  <a key={s.label} href={s.href} target="_blank" rel="noopener noreferrer" 
-                     className="w-12 h-12 rounded-full border border-current border-opacity-10 flex items-center justify-center text-xl hover:bg-blue-500 hover:text-white hover:border-blue-500 transition-all duration-500">
+                  <a key={s.label} href={s.href} target="_blank" rel="noopener noreferrer"
+                    className="w-12 h-12 rounded-full border border-current border-opacity-10 flex items-center justify-center text-xl hover:bg-blue-500 hover:text-white hover:border-blue-500 transition-all duration-500">
                     {s.icon}
                   </a>
                 ))}
@@ -157,19 +161,19 @@ const Contact = () => {
                 <div className="input-animate">
                   <label className="text-[10px] font-black uppercase tracking-widest opacity-40 mb-2 block">Name</label>
                   <input type="text" name="user_name" placeholder="John Doe" required
-                         className="w-full bg-transparent border-b border-current border-opacity-10 py-3 outline-none focus:border-blue-500 transition-colors" />
+                    className="w-full bg-transparent border-b border-current border-opacity-10 py-3 outline-none focus:border-blue-500 transition-colors" />
                 </div>
                 <div className="input-animate">
                   <label className="text-[10px] font-black uppercase tracking-widest opacity-40 mb-2 block">Email</label>
                   <input type="email" name="user_email" placeholder="john@example.com" required
-                         className="w-full bg-transparent border-b border-current border-opacity-10 py-3 outline-none focus:border-blue-500 transition-colors" />
+                    className="w-full bg-transparent border-b border-current border-opacity-10 py-3 outline-none focus:border-blue-500 transition-colors" />
                 </div>
               </div>
 
               <div className="input-animate">
                 <label className="text-[10px] font-black uppercase tracking-widest opacity-40 mb-2 block">Message</label>
                 <textarea name="message" rows={4} placeholder="What's on your mind?" required
-                          className="w-full bg-transparent border-b border-current border-opacity-10 py-3 outline-none focus:border-blue-500 transition-colors resize-none" />
+                  className="w-full bg-transparent border-b border-current border-opacity-10 py-3 outline-none focus:border-blue-500 transition-colors resize-none" />
               </div>
 
               <button
